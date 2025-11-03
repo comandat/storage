@@ -124,16 +124,42 @@ async function loadInitialStorage() {
         if (!response.ok) {
             throw new Error(`Eroare HTTP: ${response.status}`);
         }
-        const inventoryData = await response.json();
         
-        // Salvăm direct datele primite, presupunând formatul: { "SKU1": { "loc1": 5 }, ... }
-        saveToLocalStorage('inventoryLocations', inventoryData);
-        console.log("Stoc încărcat de la webhook.", inventoryData);
+        // **START CORECȚIE**
+        // Răspunsul este un array: [{ sku, location, quantity }]
+        const inventoryDataArray = await response.json(); 
+
+        // Transformă array-ul în formatul obiect cerut de aplicație
+        // Formatul așteptat: { "SKU": { "locație": cantitate } }
+        const inventoryLocationsObject = {};
         
-        // Golește productDatabase-ul local pentru a forța re-sincronizarea numelor
-        // sau am putea pre-încărca numele dacă vin în același call
-        // Deocamdată, lăsăm cache-ul de produse să se construiască la cerere.
-        // saveToLocalStorage('productDatabase', {}); // Opțional: forțează re-fetch de nume
+        if (Array.isArray(inventoryDataArray)) {
+            inventoryDataArray.forEach(item => {
+                const { sku, location, quantity } = item;
+                
+                // Verificare validitate date
+                if (!sku || !location || quantity === undefined) {
+                    console.warn("Item de stoc invalid, ignorat:", item);
+                    return;
+                }
+                
+                // Dacă SKU-ul nu există în noul obiect, creează-l
+                if (!inventoryLocationsObject[sku]) {
+                    inventoryLocationsObject[sku] = {};
+                }
+                
+                // Adaugă locația și cantitatea pentru SKU-ul respectiv
+                inventoryLocationsObject[sku][location] = quantity;
+            });
+        } else {
+            console.warn("Răspunsul API de stoc nu a fost un array:", inventoryDataArray);
+        }
+
+        // Salvează obiectul transformat, NU array-ul original
+        saveToLocalStorage('inventoryLocations', inventoryLocationsObject);
+        console.log("Stoc încărcat de la webhook (format brut):", inventoryDataArray);
+        console.log("Stoc transformat și salvat:", inventoryLocationsObject);
+        // **SFÂRȘIT CORECȚIE**
 
     } catch (error) {
         console.error("Eroare la încărcarea stocului:", error);
@@ -613,6 +639,7 @@ async function createPickingList(consolidatedItems) {
     for (const item of consolidatedItems) {
         const locations = inventory[item.sku];
         let locationKey = "N/A";
+        // **CORECȚIE** Aici trebuie să luăm prima cheie (locația) din obiectul de locații
         if (locations && Object.keys(locations).length > 0) {
             locationKey = Object.keys(locations)[0]; // Ia prima locație
         }
@@ -806,6 +833,7 @@ async function searchProducts() {
     let foundItems = [];
     
     // Pasul 1: Identifică toate SKU-urile din inventar
+    // **CORECȚIE** Acum 'inventory' este un obiect, deci Object.keys va funcționa
     const skusInInventory = Object.keys(inventory);
     
     // Pasul 2: Identifică ce detalii de produs lipsesc din cache
