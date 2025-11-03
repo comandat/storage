@@ -10,7 +10,7 @@ function toggleSearchFocus(isFocused) {
     const moveProductCard = document.querySelector('a[href="#"][onclick="showPage(\'page-move-product\')"]');
 
     if (isFocused) {
-        form.classList.add('focused');
+        // form.classList.add('focused'); // ELIMINAT
         results.classList.remove('hidden');
         scanButton.style.maxHeight = '0';
         scanButton.style.paddingTop = '0';
@@ -22,7 +22,7 @@ function toggleSearchFocus(isFocused) {
     } else {
         if (input.value.length > 0) return; 
 
-        form.classList.remove('focused');
+        // form.classList.remove('focused'); // ELIMINAT
         results.classList.add('hidden');
         results.innerHTML = '';
         scanButton.style.maxHeight = '100px';
@@ -61,15 +61,16 @@ async function searchProducts() {
     const skusToFetch = skusInInventory.filter(sku => !productDB[sku]);
 
     if (skusToFetch.length > 0) {
-        const productMap = await fetchProductDetailsBatch(skusToFetch);
+        const productMap = await fetchProductDetailsBatch(skusToFetch); // Acum e rapidă și locală
         productDB = { ...productDB, ...productMap };
     }
 
     for (const sku of skusInInventory) {
         let match = false;
-        const product = productDB[sku] || { name_ro: sku, name_en: sku, error: true };
+        const product = productDB[sku]; // Va fi placeholder-ul
         
         if (sku.toLowerCase().includes(searchTerm)) match = true;
+        // Verificăm și name_ro/name_en, care acum sunt tot SKU-ul
         if (product.name_ro && product.name_ro.toLowerCase().includes(searchTerm)) match = true;
         if (product.name_en && product.name_en.toLowerCase().includes(searchTerm)) match = true;
         
@@ -100,10 +101,9 @@ function renderSearchResults(items) {
         `).join('');
         return `
             <div class="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-lg animate-slide-in">
-                <h3 class="text-lg font-bold text-text-light dark:text-text-dark">${item.product.name_ro || item.sku}</h3>
-                ${(item.product.name_en && item.product.name_en !== item.product.name_ro) ? `<p class="text-sm text-subtext-light dark:text-subtext-dark">${item.product.name_en}</p>` : ''}
-                <p class="text-xs text-primary font-mono mb-4">${item.sku}</p>
-                <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-2 border-t border-gray-200 dark:border-gray-700 pt-3">Locații:</h4>
+                <h3 class="text-lg font-bold text-text-light dark:text-text-dark font-mono">${item.sku}</h3>
+                
+                <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-2 border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">Locații:</h4>
                 <ul class="space-y-2 text-text-light dark:text-text-dark">${locationsHtml}</ul>
             </div>
         `;
