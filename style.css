@@ -135,13 +135,14 @@ body {
     display: flex;
     align-items: center;
     padding: 8px;
-    border: 2px solid transparent;
+    /* **MODIFICARE AICI** */
+    border: 2px solid transparent; /* Lăsat transparent pentru aspectul curat inițial */
 }
-#search-form.focused {
-    border-color: #007AFF;
-    background: #fff;
-    dark:bg-card-dark;
-}
+
+/* **MODIFICARE AICI** - Blocul .focused a fost ȘTERS */
+/* #search-form.focused { ... } */
+
+
 #search-input {
     width: 100%;
     height: 100%;
@@ -164,9 +165,9 @@ body {
     dark:color-subtext-dark;
     transition: color 0.3s ease;
 }
-#search-form.focused #search-icon {
-    color: #007AFF;
-}
+/* **MODIFICARE AICI** - Blocul .focused #search-icon a fost ȘTERS */
+/* #search-form.focused #search-icon { ... } */
+
 
 /* Bulă notificare comenzi */
 #floating-order-bubble {
