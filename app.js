@@ -155,7 +155,7 @@ async function loadInitialStorage() {
  * Funcție nouă: Preluare comenzi de la API
  */
 async function fetchAndSetupOrders() {
-    showLoading(true);
+    // showLoading(true); // <-- MODIFICARE: Eliminat loading
     try {
         const response = await fetch(GET_ORDERS_WEBHOOK_URL);
         if (!response.ok) throw new Error(`Eroare HTTP: ${response.status}`);
@@ -172,7 +172,7 @@ async function fetchAndSetupOrders() {
         showToast("Eroare la preluarea comenzilor.", true);
         liveOrders = [];
     } finally {
-        showLoading(false);
+        // showLoading(false); // <-- MODIFICARE: Eliminat loading
         // Call this here, regardless of which page is active
         setupDashboardNotification(); 
     }
@@ -221,35 +221,115 @@ function extractAsinFromSku(sku) {
     return sku;
 }
 
-async function getProductDetails(sku) {
+/**
+ * (NOU) Preia detalii pentru mai multe SKU-uri într-un singur apel API.
+ * @param {string[]} skus - O listă de SKU-uri de preluat.
+ * @returns {Object} Un obiect map { sku -> productDetails }
+ */
+async function fetchProductDetailsBatch(skus) {
     const productDB = loadFromLocalStorage('productDatabase');
-    if (productDB[sku]) {
-        return productDB[sku];
+    const productsToReturn = {};
+    const skuToAsinMap = new Map(); // K: sku, V: asin
+    const asinToSkuMap = new Map(); // K: asin, V: [sku1, sku2] (pentru mapare inversă)
+
+    // Pasul 1: Verifică cache-ul și pregătește lista de preluare
+    for (const sku of skus) {
+        if (productDB[sku]) {
+            productsToReturn[sku] = productDB[sku];
+        } else {
+            const asin = extractAsinFromSku(sku);
+            skuToAsinMap.set(sku, asin);
+            
+            if (!asinToSkuMap.has(asin)) {
+                asinToSkuMap.set(asin, []);
+            }
+            asinToSkuMap.get(asin).push(sku);
+        }
     }
+
+    const asinsToFetchUnique = Array.from(asinToSkuMap.keys());
+
+    // Pasul 2: Dacă nu e nimic de preluat, returnează ce e din cache
+    if (asinsToFetchUnique.length === 0) {
+        return productsToReturn;
+    }
+
+    // Pasul 3: Preluare API
     showLoading(true);
-    const asin = extractAsinFromSku(sku);
     try {
         const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ asin: asin })
+            body: JSON.stringify({ asins: asinsToFetchUnique }) // Trimite lista de ASIN-uri
         });
-        if (!response.ok) throw new Error(`Eroare HTTP: ${response.status}`);
-        const productData = await response.json();
-        if (!productData.name_en || !productData.name_ro) {
-            productData.name_en = productData.name_en || sku;
-            productData.name_ro = productData.name_ro || sku;
+
+        if (!response.ok) {
+            throw new Error(`Eroare HTTP: ${response.status}`);
         }
-        productDB[sku] = productData;
-        saveToLocalStorage('productDatabase', productDB);
-        return productData;
+
+        // Presupunem că răspunsul este un obiect: { "ASIN1": { details }, "ASIN2": { details } }
+        const asinDataMap = await response.json();
+
+        // Pasul 4: Procesează răspunsul și actualizează cache-ul
+        for (const [asin, productData] of Object.entries(asinDataMap)) {
+            // Normalizează datele primite
+            if (!productData.name_en || !productData.name_ro) {
+                productData.name_en = productData.name_en || asin;
+                productData.name_ro = productData.name_ro || asin;
+            }
+
+            // Găsește toate SKU-urile care corespund acestui ASIN
+            const correspondingSkus = asinToSkuMap.get(asin) || [];
+            for (const sku of correspondingSkus) {
+                productDB[sku] = productData; // Salvează în cache
+                productsToReturn[sku] = productData; // Adaugă la obiectul de returnat
+            }
+        }
+
+        // Pasul 5: Gestionează ASIN-urile care nu au fost găsite de API
+        for (const asin of asinsToFetchUnique) {
+            if (!asinDataMap[asin]) {
+                const correspondingSkus = asinToSkuMap.get(asin) || [];
+                const errorProduct = { name_ro: correspondingSkus[0] || asin, name_en: correspondingSkus[0] || asin, error: true };
+                for (const sku of correspondingSkus) {
+                    productDB[sku] = errorProduct;
+                    productsToReturn[sku] = errorProduct;
+                }
+            }
+        }
+
+        saveToLocalStorage('productDatabase', productDB); // Salvează tot cache-ul actualizat
+        
     } catch (error) {
-        console.error("Eroare webhook:", error);
-        showToast(`Eroare API: ${error.message}`, true);
-        return { name_ro: sku, name_en: sku, error: true };
+        console.error("Eroare webhook batch:", error);
+        // În caz de eroare, completează SKU-urile rămase cu date de eroare
+        for (const sku of skuToAsinMap.keys()) {
+            if (!productsToReturn[sku]) {
+                productsToReturn[sku] = { name_ro: sku, name_en: sku, error: true };
+            }
+        }
     } finally {
         showLoading(false);
     }
+    
+    return productsToReturn;
+}
+
+
+/**
+ * (MODIFICAT) Preia detaliile unui singur produs.
+ * Acum folosește funcția de batch pentru a menține un singur punct de intrare API.
+ */
+async function getProductDetails(sku) {
+    const productDB = loadFromLocalStorage('productDatabase');
+    if (productDB[sku]) {
+        return productDB[sku]; // Returnează din cache
+    }
+    
+    // Apeleză funcția de batch pentru un singur item
+    const productMap = await fetchProductDetailsBatch([sku]);
+    
+    return productMap[sku] || { name_ro: sku, name_en: sku, error: true };
 }
 
 // --- Logică Scaner QR ---
@@ -314,9 +394,9 @@ function goToAddStep(step) {
 
 async function handleProductScan(sku) {
     // Mod: Adaugă produs la listă
-    showLoading(true);
-    const product = await getProductDetails(sku);
-    showLoading(false);
+    // showLoading(true); // getProductDetails se ocupă de loading
+    const product = await getProductDetails(sku); // Acum folosește funcția de batch
+    // showLoading(false);
     scannedProductList.push({ sku, product });
     renderAddProductList();
     
@@ -490,7 +570,7 @@ async function startPickingProcess() {
         return;
     }
     const consolidatedItems = consolidateOrders(liveOrders); // <-- Modificat
-    const pickingList = await createPickingList(consolidatedItems);
+    const pickingList = await createPickingList(consolidatedItems); // <-- Funcție modificată
     pickingRoutes = groupPickingListByAisle(pickingList);
     currentRouteIndex = 0;
     currentStopIndex = 0;
@@ -515,30 +595,41 @@ function consolidateOrders(orders) { // <-- Modificat
     }
     return Array.from(consolidated.values());
 }
-async function createPickingList(consolidatedItems) { /* ... (fără modificări) ... */
+
+/**
+ * (MODIFICAT) Creează lista de picking folosind preluarea batch.
+ */
+async function createPickingList(consolidatedItems) {
     let list = [];
     const inventory = loadFromLocalStorage('inventoryLocations');
+    
+    // Pasul 1: Extrage toate SKU-urile necesare
+    const skusToFetch = consolidatedItems.map(item => item.sku);
+
+    // Pasul 2: Prelucrează TOATE detaliile produselor într-un singur apel
+    const productMap = await fetchProductDetailsBatch(skusToFetch);
+
+    // Pasul 3: Construiește lista de picking (fără 'await' în buclă)
     for (const item of consolidatedItems) {
         const locations = inventory[item.sku];
+        let locationKey = "N/A";
         if (locations && Object.keys(locations).length > 0) {
-            const locationKey = Object.keys(locations)[0]; 
-            list.push({
-                sku: item.sku,
-                quantityToPick: item.totalQuantity,
-                locationKey: locationKey,
-                product: await getProductDetails(item.sku)
-            });
-        } else {
-            list.push({
-                sku: item.sku,
-                quantityToPick: item.totalQuantity,
-                locationKey: "N/A",
-                product: await getProductDetails(item.sku)
-            });
+            locationKey = Object.keys(locations)[0]; // Ia prima locație
         }
+        
+        // Preia produsul din map-ul pre-încărcat
+        const product = productMap[item.sku] || { name_ro: item.sku, name_en: item.sku, error: true };
+        
+        list.push({
+            sku: item.sku,
+            quantityToPick: item.totalQuantity,
+            locationKey: locationKey,
+            product: product
+        });
     }
     return list;
 }
+
 function getAisle(row) { /* ... (fără modificări) ... */
     row = parseInt(row, 10);
     if (row === 1 || row === 2) return "1-2";
@@ -696,37 +787,60 @@ function handleFindScan(sku) {
     searchProducts();
 }
 
-async function searchProducts() { /* ... (fără modificări) ... */
+/**
+ * (MODIFICAT) Caută produse, preluând toate detaliile lipsă într-un singur batch.
+ */
+async function searchProducts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const resultsContainer = document.getElementById('find-results');
     resultsContainer.innerHTML = '';
     toggleSearchFocus(true);
+    
     if (searchTerm.length < 1) {
         resultsContainer.innerHTML = `<p class="text-subtext-light dark:text-subtext-dark text-center p-4">Începe să tastezi pentru a căuta...</p>`;
         return;
     }
+
     const inventory = loadFromLocalStorage('inventoryLocations');
-    const productDB = loadFromLocalStorage('productDatabase');
+    let productDB = loadFromLocalStorage('productDatabase');
     let foundItems = [];
-    for (const sku in inventory) {
+    
+    // Pasul 1: Identifică toate SKU-urile din inventar
+    const skusInInventory = Object.keys(inventory);
+    
+    // Pasul 2: Identifică ce detalii de produs lipsesc din cache
+    const skusToFetch = skusInInventory.filter(sku => !productDB[sku]);
+
+    // Pasul 3: Prelucrează toate detaliile lipsă într-un singur apel batch
+    if (skusToFetch.length > 0) {
+        // fetchProductDetailsBatch afișează 'showLoading'
+        const productMap = await fetchProductDetailsBatch(skusToFetch);
+        // Actualizează copia noastră locală a productDB
+        productDB = { ...productDB, ...productMap };
+    }
+
+    // Pasul 4: Acum că productDB este complet, filtrează inventarul
+    for (const sku of skusInInventory) {
         let match = false;
+        const product = productDB[sku] || { name_ro: sku, name_en: sku, error: true };
+        
+        // Verifică potrivire pe SKU, Nume RO, Nume EN
         if (sku.toLowerCase().includes(searchTerm)) match = true;
-        let product = productDB[sku];
-        if (!product && match) product = await getProductDetails(sku);
-        if (product) {
-            if (product.name_ro && product.name_ro.toLowerCase().includes(searchTerm)) match = true;
-            if (product.name_en && product.name_en.toLowerCase().includes(searchTerm)) match = true;
-        }
+        if (product.name_ro && product.name_ro.toLowerCase().includes(searchTerm)) match = true;
+        if (product.name_en && product.name_en.toLowerCase().includes(searchTerm)) match = true;
+        
         if (match) {
             foundItems.push({
                 sku: sku,
-                product: product || { name_ro: sku, name_en: sku },
+                product: product,
                 locations: inventory[sku]
             });
         }
     }
+    
     renderSearchResults(foundItems);
 }
+
 function renderSearchResults(items) { /* ... (fără modificări) ... */
     const resultsContainer = document.getElementById('find-results');
     if (items.length === 0) {
@@ -816,9 +930,9 @@ async function handleMoveProductScan(sku) {
         showToast("Produsul este deja în listă.", true);
         return;
     }
-    showLoading(true);
-    const product = await getProductDetails(sku);
-    showLoading(false);
+    // showLoading(true); // getProductDetails se ocupă de loading
+    const product = await getProductDetails(sku); // Acum folosește funcția de batch
+    // showLoading(false);
     moveProductList.push({ sku, product });
     renderMoveProductList();
     showToast(`Adăugat: ${product.name_ro || sku}`);
