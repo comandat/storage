@@ -9,8 +9,9 @@ let html5QrCode;
 let currentScanMode = null; // 'product', 'location', 'find', 'move_product', 'move_destination'
 
 // Stare "Adaugă Produs"
-let scannedProductList = []; // Listă de {sku, product}
+let scannedProductList = []; // Listă de {sku, product, quantity}
 let scannedLocation = null;
+let currentScannedProduct = null; // NOU: {sku, product} - produsul scanat curent
 
 // Stare "Mută Produs"
 let moveProductList = []; // Listă de {sku, product}
