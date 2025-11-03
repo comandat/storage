@@ -96,101 +96,37 @@ async function sendStorageUpdate(sku, location, operation_type, value) {
     }
 }
 
-function extractAsinFromSku(sku) {
-    const suffixes = ["CN", "FB", "B"];
-    for (const suffix of suffixes) {
-        if (sku.endsWith(suffix) && sku.length > suffix.length) {
-            return sku.slice(0, -suffix.length);
-        }
-    }
-    return sku;
-}
+// Funcția extractAsinFromSku a fost ȘTEARSĂ
 
 /**
- * Preia detalii pentru mai multe SKU-uri într-un singur apel API.
+ * Preia detalii pentru mai multe SKU-uri.
+ * MODIFICAT: Nu mai apelează API-ul de produse, returnează SKU-ul ca nume.
  */
 async function fetchProductDetailsBatch(skus) {
     const productDB = loadFromLocalStorage('productDatabase');
     const productsToReturn = {};
-    const skuToAsinMap = new Map(); 
-    const asinToSkuMap = new Map(); 
 
     for (const sku of skus) {
         if (productDB[sku]) {
             productsToReturn[sku] = productDB[sku];
         } else {
-            const asin = extractAsinFromSku(sku);
-            skuToAsinMap.set(sku, asin);
-            
-            if (!asinToSkuMap.has(asin)) {
-                asinToSkuMap.set(asin, []);
-            }
-            asinToSkuMap.get(asin).push(sku);
+            // Creează un produs placeholder
+            const placeholderProduct = { name_ro: sku, name_en: sku, error: true };
+            productDB[sku] = placeholderProduct; // Salvează placeholder în cache
+            productsToReturn[sku] = placeholderProduct;
         }
-    }
-
-    const asinsToFetchUnique = Array.from(asinToSkuMap.keys());
-
-    if (asinsToFetchUnique.length === 0) {
-        return productsToReturn;
-    }
-
-    showLoading(true);
-    try {
-        const response = await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ asins: asinsToFetchUnique }) 
-        });
-
-        if (!response.ok) {
-            throw new Error(`Eroare HTTP: ${response.status}`);
-        }
-
-        const asinDataMap = await response.json();
-
-        for (const [asin, productData] of Object.entries(asinDataMap)) {
-            if (!productData.name_en || !productData.name_ro) {
-                productData.name_en = productData.name_en || asin;
-                productData.name_ro = productData.name_ro || asin;
-            }
-
-            const correspondingSkus = asinToSkuMap.get(asin) || [];
-            for (const sku of correspondingSkus) {
-                productDB[sku] = productData; 
-                productsToReturn[sku] = productData; 
-            }
-        }
-
-        for (const asin of asinsToFetchUnique) {
-            if (!asinDataMap[asin]) {
-                const correspondingSkus = asinToSkuMap.get(asin) || [];
-                const errorProduct = { name_ro: correspondingSkus[0] || asin, name_en: correspondingSkus[0] || asin, error: true };
-                for (const sku of correspondingSkus) {
-                    productDB[sku] = errorProduct;
-                    productsToReturn[sku] = errorProduct;
-                }
-            }
-        }
-
-        saveToLocalStorage('productDatabase', productDB); 
-        
-    } catch (error) {
-        console.error("Eroare webhook batch:", error);
-        for (const sku of skuToAsinMap.keys()) {
-            if (!productsToReturn[sku]) {
-                productsToReturn[sku] = { name_ro: sku, name_en: sku, error: true };
-            }
-        }
-    } finally {
-        showLoading(false);
     }
     
+    // Salvează noile placeholder-uri (dacă au fost)
+    saveToLocalStorage('productDatabase', productDB); 
+    
+    // Returnează direct, fără apel API (fără showLoading)
     return productsToReturn;
 }
 
 /**
  * Preia detaliile unui singur produs (folosind funcția de batch).
+ * MODIFICAT: Acum este o funcție locală rapidă.
  */
 async function getProductDetails(sku) {
     const productDB = loadFromLocalStorage('productDatabase');
@@ -198,7 +134,8 @@ async function getProductDetails(sku) {
         return productDB[sku]; // Returnează din cache
     }
     
+    // Apeleză funcția de batch (care acum e locală și rapidă)
     const productMap = await fetchProductDetailsBatch([sku]);
     
-    return productMap[sku] || { name_ro: sku, name_en: sku, error: true };
+    return productMap[sku];
 }
