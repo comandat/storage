@@ -118,14 +118,14 @@ body {
 
 /* Bară de căutare animată (mărită) */
 #search-container {
-    position: relative;
+    /* position: relative; */ /* ȘTERS */
     width: 100%;
     height: 64px; /* Mărit */
 }
 #search-form {
-    position: absolute;
-    top: 0;
-    left: 0;
+    /* position: absolute; */ /* ȘTERS */
+    /* top: 0; */ /* ȘTERS */
+    /* left: 0; */ /* ȘTERS */
     width: 100%;
     height: 64px; /* Mărit */
     background: #fff;
@@ -134,14 +134,11 @@ body {
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    padding: 8px;
-    /* **MODIFICARE AICI** */
-    border: 2px solid transparent; /* Lăsat transparent pentru aspectul curat inițial */
+    /* padding: 8px; */ /* ȘTERS - înlocuit mai jos */
+    border: 2px solid transparent;
+    padding-left: 1.25rem; /* NOU */
+    padding-right: 1.25rem; /* NOU */
 }
-
-/* **MODIFICARE AICI** - Blocul .focused a fost ȘTERS */
-/* #search-form.focused { ... } */
-
 
 #search-input {
     width: 100%;
@@ -150,24 +147,23 @@ body {
     outline: none;
     background: transparent;
     font-size: 1.2rem; /* Mărit */
-    padding-left: 50px; /* Mărit */
+    /* padding-left: 50px; */ /* ȘTERS */
+    padding-left: 0.75rem; /* NOU */
     padding-right: 10px;
     color: #111827;
     dark:color-text-dark;
 }
 #search-icon {
-    position: absolute;
-    left: 18px; /* Ajustat */
-    top: 50%;
-    transform: translateY(-50%);
+    /* position: absolute; */ /* ȘTERS */
+    /* left: 18px; */ /* ȘTERS */
+    /* top: 50%; */ /* ȘTERS */
+    /* transform: translateY(-50%); */ /* ȘTERS */
     font-size: 28px; /* Mărit */
     color: #6B7280;
     dark:color-subtext-dark;
     transition: color 0.3s ease;
+    flex-shrink: 0; /* NOU */
 }
-/* **MODIFICARE AICI** - Blocul .focused #search-icon a fost ȘTERS */
-/* #search-form.focused #search-icon { ... } */
-
 
 /* Bulă notificare comenzi */
 #floating-order-bubble {
