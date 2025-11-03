@@ -2,7 +2,7 @@
 <html class="dark" lang="ro">
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
     <title>Manager Stocuri</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -107,7 +107,7 @@
             
             <div id="add-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
-                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează unul sau mai multe produse pe care vrei să le adaugi. Fiecare scanare adaugă o bucată.</p>
+                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează un produs pentru a-i adăuga cantitatea.</p>
                 
                 <div id="add-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
                     </div>
@@ -122,6 +122,25 @@
                 </button>
             </div>
 
+            <div id="add-step-1b-quantity" class="hidden animate-slide-in mt-8">
+                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Setează Cantitatea</h2>
+                
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-6 text-center">
+                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Produs (SKU):</p>
+                    <div id="add-quantity-sku" class="text-text-light dark:text-text-dark font-semibold text-lg font-mono">...</div>
+                </div>
+    
+                <label for="add-quantity-input" class="block text-sm font-medium text-subtext-light dark:text-subtext-dark mb-2">Cantitate de adăugat:</label>
+                <input type="number" id="add-quantity-input" value="1" min="1" class="w-full p-4 text-lg rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-text-dark text-center">
+    
+                <button onclick="confirmAddQuantity()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg mt-6">
+                    <span>Adaugă</span>
+                    <span class="material-icons-outlined">check_circle</span>
+                </button>
+                <button onclick="goToAddStep(1)" class="w-full text-center text-primary mt-4">
+                    Anulează
+                </button>
+            </div>
             <div id="add-step-2-location" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Scanează Locația</h2>
                 
@@ -195,6 +214,7 @@
                             </div>
                             </div>
                     </div>
+                    
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Cantitate de ridicat:</h4>
                         <div class="text-4xl font-bold text-primary" id="stop-quantity">...</div>
