@@ -215,8 +215,10 @@ body {
     display: none; /* Ascuns implicit */
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 50%; /* MODIFICAT: Centrat */
+    transform: translateX(-50%); /* MODIFICAT: Centrat */
     width: 100%;
+    max-width: 28rem; /* MODIFICAT: Adăugat max-width (448px) */
     padding: 1.5rem;
     background: linear-gradient(to top, rgba(243, 244, 246, 1), rgba(243, 244, 246, 0));
     dark:background: linear-gradient(to top, rgba(11, 17, 23, 1), rgba(11, 17, 23, 0));
@@ -234,8 +236,10 @@ body {
     display: none; /* Ascuns implicit */
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 50%; /* MODIFICAT: Centrat */
+    transform: translateX(-50%); /* MODIFICAT: Centrat */
     width: 100%;
+    max-width: 28rem; /* MODIFICAT: Adăugat max-width (448px) */
     padding: 0 1.5rem 1.5rem 1.5rem; /* Doar padding-ul cardului, fără cel de sus */
     background: linear-gradient(to top, rgba(243, 244, 246, 1), rgba(243, 244, 246, 0));
     dark:background: linear-gradient(to top, rgba(11, 17, 23, 1), rgba(11, 17, 23, 0));
