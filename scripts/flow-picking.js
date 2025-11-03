@@ -72,7 +72,7 @@ async function createPickingList(consolidatedItems) {
     const inventory = loadFromLocalStorage('inventoryLocations');
     
     const skusToFetch = consolidatedItems.map(item => item.sku);
-    const productMap = await fetchProductDetailsBatch(skusToFetch);
+    const productMap = await fetchProductDetailsBatch(skusToFetch); // Acum e rapidă și locală
 
     for (const item of consolidatedItems) {
         const locations = inventory[item.sku];
@@ -81,7 +81,7 @@ async function createPickingList(consolidatedItems) {
             locationKey = Object.keys(locations)[0];
         }
         
-        const product = productMap[item.sku] || { name_ro: item.sku, name_en: item.sku, error: true };
+        const product = productMap[item.sku]; // Va fi placeholder-ul cu { name_ro: sku }
         
         list.push({
             sku: item.sku,
@@ -137,31 +137,17 @@ async function renderCurrentPickingStop() {
     
     const displayDiv = document.getElementById('stop-product-display');
     const product = stop.product;
+    
+    // Afișează direct SKU-ul
     displayDiv.dataset.sku = stop.sku;
-    displayDiv.dataset.nameRo = product.name_ro || stop.sku;
-    displayDiv.dataset.nameEn = product.name_en || stop.sku;
+    displayDiv.dataset.nameRo = product.name_ro; // Va fi SKU-ul
+    displayDiv.dataset.nameEn = product.name_en; // Va fi SKU-ul
     displayDiv.dataset.state = "sku";
-    displayDiv.textContent = stop.sku;
+    displayDiv.textContent = stop.sku; // Afișează SKU
     displayDiv.classList.add('font-mono');
 }
 
-function toggleProductDisplay() {
-    const displayDiv = document.getElementById('stop-product-display');
-    const state = displayDiv.dataset.state;
-    if (state === "sku") {
-        displayDiv.textContent = displayDiv.dataset.nameRo;
-        displayDiv.dataset.state = "ro";
-        displayDiv.classList.remove('font-mono');
-    } else if (state === "ro") {
-        displayDiv.textContent = displayDiv.dataset.nameEn;
-        displayDiv.dataset.state = "en";
-        displayDiv.classList.remove('font-mono');
-    } else {
-        displayDiv.textContent = displayDiv.dataset.sku;
-        displayDiv.dataset.state = "sku";
-        displayDiv.classList.add('font-mono');
-    }
-}
+// Funcția toggleProductDisplay a fost ȘTEARSĂ
 
 async function advancePickingStop() {
     if (currentRouteIndex >= pickingRoutes.length) return;
