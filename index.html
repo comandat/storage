@@ -2,17 +2,14 @@
 <html class="dark" lang="ro">
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="width=device-width, initial-scale-1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
     <title>Manager Stocuri</title>
     
-    <!-- Fonturi și Iconițe -->
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     
-    <!-- Configurare Tailwind -->
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -45,22 +42,18 @@
         };
     </script>
     
-    <!-- CSS Personalizat -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display antialiased">
 
-    <!-- Containerul principal al aplicației -->
     <div id="app-container" class="max-w-md mx-auto">
     
-        <!-- PAGINA 1: Dashboard (Acasă) -->
         <div id="page-dashboard" class="page active p-6">
             <header class="flex items-center justify-center py-4 relative">
                 <h1 class="text-xl font-semibold text-text-light dark:text-text-dark">Depozit</h1>
             </header>
 
-            <!-- Zona de Căutare Integrată (ACUM PRIMA) -->
             <div id="search-zone" class="mb-6 mt-6">
                 <div id="search-container">
                     <form id="search-form" class="dark:bg-card-dark shadow-sm" onsubmit="event.preventDefault();">
@@ -69,19 +62,15 @@
                     </form>
                 </div>
                 
-                <!-- Butonul "Căută după QR" (mărit) -->
                 <button id="scan-find-button" onclick="startScanner('find')" class="w-full bg-primary text-white font-bold py-5 rounded-xl flex items-center justify-center space-x-2 text-lg mt-4 shadow-lg shadow-primary/30 dark:shadow-glow-primary transition-all duration-300">
                     <span class="material-icons-outlined">qr_code_scanner</span>
                     <span>Căută după QR</span>
                 </button>
 
-                <!-- Rezultate Căutare (ascunse inițial) -->
                 <div id="find-results" class="space-y-4 mt-4 hidden">
-                    <!-- Rezultatele căutării vor fi injectate aici -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Cardurile principale (vor fi ascunse la căutare) -->
             <main id="main-cards" class="flex-grow flex flex-col space-y-5 mt-6">
                 <a class="group block p-8 bg-card-light dark:bg-card-dark rounded-3xl transition-all duration-300 hover:scale-[1.03] hover:shadow-xl dark:hover:bg-card-dark/80" href="#" onclick="showPage('page-add-product')">
                     <div class="flex items-center space-x-6">
@@ -95,7 +84,6 @@
                     </div>
                 </a>
                 
-                <!-- Card NOU: Mută Produs -->
                 <a class="group block p-8 bg-card-light dark:bg-card-dark rounded-3xl transition-all duration-300 hover:scale-[1.03] hover:shadow-xl dark:hover:bg-card-dark/80" href="#" onclick="showPage('page-move-product')">
                     <div class="flex items-center space-x-6">
                         <div class="p-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-colors">
@@ -110,24 +98,19 @@
             </main>
         </div>
 
-        <!-- PAGINA 2: Căutare / Găsire Produs (Goală) -->
         <div id="page-find-product" class="page"></div>
 
-        <!-- PAGINA 3: Adaugă Produs la Locație -->
         <div id="page-add-product" class="page p-6 relative">
             <button onclick="showPage('page-dashboard')" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
                 <span class="material-icons-outlined text-3xl">close</span>
             </button>
             
-            <!-- Pasul 1: Scanare Produse (Interfață nouă) -->
             <div id="add-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
                 <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează unul sau mai multe produse pe care vrei să le adaugi. Fiecare scanare adaugă o bucată.</p>
                 
-                <!-- Lista de produse scanate -->
                 <div id="add-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
-                    <!-- Produsele scanate vor fi injectate aici -->
-                </div>
+                    </div>
 
                 <button onclick="startScanner('product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
                     <span class="material-icons-outlined">qr_code_scanner</span>
@@ -139,7 +122,6 @@
                 </button>
             </div>
 
-            <!-- Pasul 2: Scanare Locație (Modificat) -->
             <div id="add-step-2-location" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Scanează Locația</h2>
                 
@@ -158,15 +140,13 @@
                 </button>
             </div>
 
-            <!-- Pasul 3: Confirmare (Înlocuiește Cantitatea) -->
             <div id="add-step-3-confirm" class="hidden animate-slide-in mt-8 flex flex-col h-full" style="min-height: 70vh;">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 3: Confirmă Adăugarea</h2>
                 
                 <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-4 text-center">
                     <p class="text-sm text-subtext-light dark:text-subtext-dark">Produse:</p>
                     <ul id="add-confirm-list" class="text-text-light dark:text-text-dark font-semibold text-lg list-disc list-inside text-left p-2">
-                        <!-- Sumar produse -->
-                    </ul>
+                        </ul>
                 </div>
                 
                 <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-6 text-center">
@@ -174,10 +154,8 @@
                     <div id="add-confirm-location" class="text-text-light dark:text-text-dark font-semibold text-lg">...</div>
                 </div>
 
-                <!-- Spacer -->
                 <div class="flex-grow"></div>
                 
-                <!-- Butoane acțiune jos -->
                 <div class="mt-auto pt-6">
                     <button onclick="saveMultiAdd()" class="w-full bg-green-600 text-white font-bold py-5 rounded-2xl flex items-center justify-center space-x-2 text-xl shadow-lg mb-4">
                         <span class="material-icons-outlined">check_circle</span>
@@ -195,9 +173,7 @@
             </div>
         </div>
 
-        <!-- PAGINA 4: Flux de Picking (UI Modificat) -->
         <div id="page-picking" class="page p-6 relative">
-            <!-- Header nou (doar 'X') -->
             <header class="flex items-center justify-end py-4 relative">
                 <button onclick="showPage('page-dashboard')" class="p-2 text-subtext-light dark:text-subtext-dark z-10">
                     <span class="material-icons-outlined text-3xl">close</span>
@@ -205,17 +181,12 @@
             </header>
             
             <div id="picking-content">
-                <!-- Am scos Antetul Rutei -->
-                
-                <!-- Cardul Opririi Curente (Locația e sus) -->
                 <div class="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-lg animate-slide-in" id="picking-stop-card">
-                    <!-- Locația MARE -->
                     <div class="mb-4 text-center">
                         <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Mergi la Locația:</h4>
                         <div class="text-3xl font-bold text-primary" id="stop-location">...</div>
                     </div>
 
-                    <!-- Produsul -->
                     <div class="mb-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-2">Produs:</h4>
                         <div class="flex items-center space-x-3">
@@ -228,17 +199,14 @@
                         </div>
                     </div>
                     
-                    <!-- Cantitatea -->
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Cantitate de ridicat:</h4>
                         <div class="text-4xl font-bold text-primary" id="stop-quantity">...</div>
                     </div>
                 </div>
 
-                <!-- Butonul e mutat în footer-ul fix -->
-            </div>
+                </div>
 
-            <!-- Stare de finalizare -->
             <div id="picking-complete" class="hidden text-center p-8">
                 <span class="material-icons-outlined text-8xl text-green-500">task_alt</span>
                 <h2 class="text-2xl font-bold text-text-light dark:text-text-dark mt-4">Picking Finalizat!</h2>
@@ -248,7 +216,6 @@
                 </button>
             </div>
             
-            <!-- Footer fix pentru butonul de picking -->
             <div id="picking-footer" class="max-w-md mx-auto">
                  <button id="picking-next-button" onclick="advancePickingStop()" class="w-full bg-green-600 text-white font-bold py-5 rounded-2xl flex items-center justify-center space-x-2 text-xl shadow-lg">
                     <span class="material-icons-outlined">check_circle</span>
@@ -257,21 +224,17 @@
             </div>
         </div>
 
-        <!-- PAGINA 5: Mută Produs (Nouă) -->
         <div id="page-move-product" class="page p-6 relative">
             <button onclick="showPage('page-dashboard')" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
                 <span class="material-icons-outlined text-3xl">close</span>
             </button>
             
-            <!-- Pasul 1: Scanare Produse (Interfață nouă) -->
             <div id="move-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
                 <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează unul sau mai multe produse pe care vrei să le muți.</p>
                 
-                <!-- Lista de produse scanate -->
                 <div id="move-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
-                    <!-- Produsele scanate vor fi injectate aici -->
-                </div>
+                    </div>
 
                 <button onclick="startScanner('move_product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
                     <span class="material-icons-outlined">qr_code_scanner</span>
@@ -283,16 +246,13 @@
                 </button>
             </div>
 
-            <!-- Pasul 2: Selectare Surse (Modificat pentru Multi-SKU) -->
             <div id="move-step-2-source" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Selectează Sursele</h2>
                 
                 <p class="text-subtext-light dark:text-subtext-dark mb-4 text-center">Introdu cantitatea de mutat din fiecare locație:</p>
                 
-                <!-- Lista de locații sursă (grupate pe SKU) -->
                 <div id="move-source-list" class="space-y-6 mb-6">
-                    <!-- Locațiile vor fi injectate aici -->
-                </div>
+                    </div>
                 
                 <button onclick="goToMoveStep(3)" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg">
                     <span>Continuă</span>
@@ -303,7 +263,6 @@
                 </button>
             </div>
 
-            <!-- Pasul 3: Scanare Destinație -->
             <div id="move-step-3-destination" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 3: Scanează Destinația</h2>
                 
@@ -322,7 +281,6 @@
                 </button>
             </div>
             
-            <!-- Pasul 4: Confirmare -->
             <div id="move-step-4-confirm" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 4: Confirmă Mutarea</h2>
                 
@@ -356,17 +314,12 @@
         </div>
 
 
-    </div> <!-- Sfârșitul #app-container -->
-
-    <!-- Bulă Notificare Comandă -->
-    <div id="floating-order-bubble" class="hidden" onclick="showPage('page-picking')">
+    </div> <div id="floating-order-bubble" class="hidden" onclick="showPage('page-picking')">
         <span class="material-icons-outlined">notifications_active</span>
         <span id="floating-order-count">0</span>
     </div>
 
-    <!-- Footer Notificare Comandă (NOU) -->
     <div id="notification-footer" class="max-w-md mx-auto">
-        <!-- Cardul de notificare mutat aici -->
         <div onclick="showPage('page-picking')" class="relative bg-primary rounded-2xl shadow-lg shadow-primary/30 dark:shadow-glow-primary overflow-hidden animate-slide-in cursor-pointer" id="order-notification">
             <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"></div>
             <div class="absolute -bottom-12 -left-4 w-24 h-24 bg-white/10 rounded-full"></div>
@@ -385,7 +338,6 @@
         </div>
     </div>
 
-    <!-- Modal pentru Scaner QR -->
     <div id="scanner-modal">
         <div class="text-white text-lg p-4 text-center" id="scanner-message">Așezați codul QR în cadru</div>
         <div id="reader"></div>
@@ -394,18 +346,23 @@
         </button>
     </div>
 
-    <!-- Notificare Toast -->
     <div id="toast"></div>
 
-    <!-- Overlay pentru încărcare (apel API) -->
     <div id="loading-overlay">
         <div class="spinner"></div>
     </div>
 
 
-    <!-- Script-uri -->
     <script src="https://unpkg.com/html5-qrcode@2.0.9/dist/html5-qrcode.min.js"></script>
-    <script src="app.js"></script>
+    
+    <script src="state.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="scanner.js"></script>
+    <script src="flow-search.js"></script>
+    <script src="flow-add.js"></script>
+    <script src="flow-move.js"></script>
+    <script src="flow-picking.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
-
