@@ -1,0 +1,262 @@
+.material-icons-outlined {
+    font-size: inherit;
+}
+
+.animate-slide-in {
+    animation: slide-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+#app-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative; /* Necesar pentru 'click outside' */
+    padding-bottom: 90px; /* Spațiu pentru butoanele fixe (picking) */
+}
+
+.page {
+    display: none;
+}
+.page.active {
+    display: block;
+}
+
+/* Modal Scaner QR */
+#scanner-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#reader {
+    width: 90%;
+    max-width: 400px;
+    background: #161D26;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 2px solid #007AFF;
+}
+#scanner-modal.active {
+    display: flex;
+}
+
+/* Notificare Toast */
+#toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    background-color: #007AFF;
+    color: white;
+    border-radius: 1rem;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    visibility: hidden;
+}
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    visibility: visible;
+}
+
+/* Spinner încărcare */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #007AFF;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+    display: none;
+}
+
+/* Bară de căutare animată (mărită) */
+#search-container {
+    position: relative;
+    width: 100%;
+    height: 64px; /* Mărit */
+}
+#search-form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 64px; /* Mărit */
+    background: #fff;
+    dark:bg-card-dark;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border: 2px solid transparent;
+}
+#search-form.focused {
+    border-color: #007AFF;
+    background: #fff;
+    dark:bg-card-dark;
+}
+#search-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1.2rem; /* Mărit */
+    padding-left: 50px; /* Mărit */
+    padding-right: 10px;
+    color: #111827;
+    dark:color-text-dark;
+}
+#search-icon {
+    position: absolute;
+    left: 18px; /* Ajustat */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px; /* Mărit */
+    color: #6B7280;
+    dark:color-subtext-dark;
+    transition: color 0.3s ease;
+}
+#search-form.focused #search-icon {
+    color: #007AFF;
+}
+
+/* Bulă notificare comenzi */
+#floating-order-bubble {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 40;
+    width: 60px;
+    height: 60px;
+    background-color: #007AFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+    cursor: pointer;
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+#floating-order-bubble.visible {
+    transform: scale(1);
+}
+#floating-order-bubble .material-icons-outlined {
+    color: white;
+    font-size: 28px;
+}
+#floating-order-count {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    background-color: #E53E3E;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* Buton fixat jos (pentru picking) */
+#picking-footer {
+    display: none; /* Ascuns implicit */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(243, 244, 246, 1), rgba(243, 244, 246, 0));
+    dark:background: linear-gradient(to top, rgba(11, 17, 23, 1), rgba(11, 17, 23, 0));
+    z-index: 30;
+}
+.dark #picking-footer {
+    background: linear-gradient(to top, rgba(11, 17, 23, 1) 50%, rgba(11, 17, 23, 0));
+}
+.light #picking-footer {
+    background: linear-gradient(to top, rgba(243, 244, 246, 1) 50%, rgba(243, 244, 246, 0));
+}
+
+/* Footer fixat jos (pentru notificare dashboard) */
+#notification-footer {
+    display: none; /* Ascuns implicit */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 0 1.5rem 1.5rem 1.5rem; /* Doar padding-ul cardului, fără cel de sus */
+    background: linear-gradient(to top, rgba(243, 244, 246, 1), rgba(243, 244, 246, 0));
+    dark:background: linear-gradient(to top, rgba(11, 17, 23, 1), rgba(11, 17, 23, 0));
+    z-index: 30;
+}
+.dark #notification-footer {
+    background: linear-gradient(to top, rgba(11, 17, 23, 1) 50%, rgba(11, 17, 23, 0));
+}
+.light #notification-footer {
+    background: linear-gradient(to top, rgba(243, 244, 246, 1) 50%, rgba(243, 244, 246, 0));
+}
+
+/* Stil pentru listele de produse scanate */
+.product-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background-color: #f3f4f6; /* background-light */
+    border-radius: 0.75rem;
+}
+.dark .product-list-item {
+    background-color: #161D26; /* card-dark */
+}
