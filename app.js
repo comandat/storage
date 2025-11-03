@@ -137,7 +137,7 @@ async function loadInitialStorage() {
 
     } catch (error) {
         console.error("Eroare la încărcarea stocului:", error);
-        showToast("Eroare la încărcarea stocului.", true);
+        // showToast("Eroare la încărcarea stocului.", true); // <-- MODIFICARE: Am eliminat eroarea vizuală
         // Încarcă un stoc gol dacă eșuează
         saveToLocalStorage('inventoryLocations', {});
     } finally {
