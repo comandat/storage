@@ -99,3 +99,7 @@ function onScanSuccess(decodedText, decodedResult) {
         handleMoveDestinationScan(decodedText);
     }
 }
+
+// Expun funcțiile necesare global
+window.startScanner = startScanner;
+window.stopScanner = stopScanner;
