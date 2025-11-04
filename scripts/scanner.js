@@ -2,7 +2,17 @@
 function startScanner(mode) {
     currentScanMode = mode;
     document.getElementById('scanner-modal').classList.add('active');
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
+    // Configurație optimizată pentru viteză
+    const config = { 
+        fps: 15, // Am crescut FPS-ul pentru o imagine mai fluidă
+        qrbox: { width: 250, height: 250 },
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true // FORȚEAZĂ detectorul nativ (MULT MAI RAPID)
+        },
+        rememberLastUsedCamera: true
+    };
+    
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
         .catch(err => {
             console.error("Eroare cameră:", err);
