@@ -1,13 +1,92 @@
-// --- Logică Scaner QR (cu zxing-js/library) ---
-
-// Nu mai importăm QrScanner. Vom folosi obiectul global 'ZXing'
-// încărcat din CDN în index.html
-
-// Variabilă globală în modul pentru a ține minte instanța scannerului
-let zxingCodeReader = null;
+// --- Logică Scaner QR (cu nimiq/qr-scanner) ---
+// Folosim din nou biblioteca originală
+import QrScanner from './qr-scanner.min.js';
 
 /**
- * Funcție de succes a scanării (cea originală)
+ * Funcție adaptor pentru a trimite rezultatul scanării
+ * în formatul așteptat de funcția ta existentă onScanSuccess.
+ */
+function onScanSuccessAdapter(result) {
+    // result este un obiect: { data: "...", cornerPoints: [...] }
+    onScanSuccess(result.data, result);
+}
+
+/**
+ * Funcție adaptor pentru erori.
+ */
+function onScanError(error) {
+    // Putem ignora "No QR code found"
+    if (error === QrScanner.NO_QR_CODE_FOUND) {
+        return;
+    }
+    console.error("Eroare QrScanner:", error);
+    showToast(`Eroare scanare: ${error}`, true);
+}
+
+async function startScanner(mode) {
+    currentScanMode = mode;
+    document.getElementById('scanner-modal').classList.add('active');
+    
+    const videoElem = document.getElementById('qr-video');
+    if (!videoElem) {
+        console.error("Elementul <video id='qr-video'> nu a fost găsit.");
+        stopScanner();
+        return;
+    }
+
+    // Inițializează scannerul
+    qrScanner = new QrScanner(
+        videoElem,
+        onScanSuccessAdapter,
+        {
+            onDecodeError: onScanError,
+            
+            // --- MODIFICARE ---
+            // 1. Reactivăm "cutia" de scanare.
+            // Acest lucru concentrează procesorul pe o singură zonă
+            // și ajută enorm la decodarea codurilor dificile.
+            highlightScanRegion: true,
+            
+            // 2. Reactivăm conturul codului găsit
+            highlightCodeOutline: true,
+            
+            // 3. Am ȘTERS funcția 'calculateScanRegion'
+            // pentru a lăsa biblioteca să-și folosească
+            // funcția implicită (cutia din centru).
+            
+            // 4. Necesara pentru a primi obiectul { data: "..." }
+            returnDetailedScanResult: true 
+        }
+    );
+
+    // --- MODIFICARE PENTRU BORDURA NEAGRĂ ---
+    // Această setare este VITALĂ și o păstrăm.
+    // Combinată cu scanarea regională (cutia), ar trebui
+    // să funcționeze acum.
+    qrScanner.setInversionMode('both');
+    // --- SFÂRȘIT MODIFICARE ---
+
+    try {
+        await qrScanner.start();
+    } catch (err) {
+        console.error("Eroare la pornirea QrScanner (nimiq):", err);
+        showToast("Eroare la pornirea camerei. Verifică permisiunile.", true);
+        stopScanner();
+    }
+}
+
+function stopScanner() {
+    if (qrScanner) {
+        qrScanner.destroy(); // Folosim destroy() pentru a curăța complet
+        qrScanner = null;
+    }
+    document.getElementById('scanner-modal').classList.remove('active');
+}
+
+/**
+ * Această funcție este cea originală din proiectul tău.
+ * Rămâne neschimbată, deoarece adaptorul (onScanSuccessAdapter)
+ * îi trimite datele în formatul corect.
  */
 function onScanSuccess(decodedText, decodedResult) {
     stopScanner();
@@ -16,7 +95,7 @@ function onScanSuccess(decodedText, decodedResult) {
     if (navigator.vibrate) {
         navigator.vibrate(100);
     }
-
+    
     // Pasează rezultatul către funcția relevantă
     if (currentScanMode === 'product') {
         handleProductScan(decodedText);
@@ -29,61 +108,6 @@ function onScanSuccess(decodedText, decodedResult) {
     } else if (currentScanMode === 'move_destination') {
         handleMoveDestinationScan(decodedText);
     }
-}
-
-/**
- * Funcție de eroare a scanării
- */
-function onScanError(error) {
-    // Ignorăm erorile de "Not Found", sunt normale în timpul scanării
-    if (error instanceof ZXing.NotFoundException) {
-        return;
-    }
-    console.error("Eroare ZXing:", error);
-    showToast(`Eroare scanare: ${error.message}`, true);
-}
-
-async function startScanner(mode) {
-    currentScanMode = mode;
-    document.getElementById('scanner-modal').classList.add('active');
-
-    const videoElem = document.getElementById('qr-video');
-    if (!videoElem) {
-        console.error("Elementul <video id='qr-video'> nu a fost găsit.");
-        stopScanner();
-        return;
-    }
-
-    // Inițializăm cititorul ZXing. 
-    // Acesta include capabilități de inversare și robustețe.
-    zxingCodeReader = new ZXing.BrowserMultiFormatReader();
-
-    try {
-        // Începe decodarea de la camera
-        // 'undefined' lasă ZXing să aleagă camera (default e cea 'environment'/spate)
-        zxingCodeReader.decodeFromVideoDevice(undefined, 'qr-video', (result, err) => {
-            if (result) {
-                // Avem un rezultat!
-                onScanSuccess(result.getText(), result);
-            }
-            if (err) {
-                // Avem o eroare
-                onScanError(err);
-            }
-        });
-    } catch (err) {
-        console.error("Eroare la pornirea camerei cu ZXing:", err);
-        showToast("Eroare la pornirea camerei. Verifică permisiunile.", true);
-        stopScanner();
-    }
-}
-
-function stopScanner() {
-    if (zxingCodeReader) {
-        zxingCodeReader.reset(); // Oprește camera și eliberează resursele
-        zxingCodeReader = null;
-    }
-    document.getElementById('scanner-modal').classList.remove('active');
 }
 
 // Expun funcțiile necesare global
