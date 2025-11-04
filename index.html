@@ -354,7 +354,7 @@
         </div>
     </div>
 
-<div id="scanner-modal">
+    <div id="scanner-modal">
         <div class="text-white text-lg p-4 text-center" id="scanner-message">Așezați codul QR în cadru</div>
         <video id="qr-video" style="width: 90%; max-width: 400px; border-radius: 1rem;"></video>
         <button onclick="stopScanner()" class="mt-6 bg-red-600 text-white font-bold py-3 px-8 rounded-xl text-lg">
@@ -367,18 +367,15 @@
     <div id="loading-overlay">
         <div class="spinner"></div>
     </div>
-
-
-    <video id="qr-video" style="width: 100%; height: auto;"></video>
     
-    <script src="scripts/state.js"></script>
-    <script src="scripts/utils.js"></script>
-    <script src="scripts/api.js"></script>
-    <script src="scripts/scanner.js"></script>
-    <script src="scripts/flow-search.js"></script>
-    <script src="scripts/flow-add.js"></script>
-    <script src="scripts/flow-move.js"></script>
-    <script src="scripts/flow-picking.js"></script>
+    <script type="module" src="scripts/state.js"></script>
+    <script type="module" src="scripts/utils.js"></script>
+    <script type="module" src="scripts/api.js"></script>
+    <script type="module" src="scripts/scanner.js"></script>
+    <script type="module" src="scripts/flow-search.js"></script>
+    <script type="module" src="scripts/flow-add.js"></script>
+    <script type="module" src="scripts/flow-move.js"></script>
+    <script type="module" src="scripts/flow-picking.js"></script>
     <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
