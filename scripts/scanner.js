@@ -18,30 +18,14 @@ function startScanner(mode) {
         ]
     };
 
-    // OPTIMIZARE: Adăugăm constrângeri video pentru a cere focus continuu ȘI O REZOLUȚIE OPTIMĂ
-    const videoConstraints = {
-        facingMode: "environment",
-        focusMode: "continuous", // Cere camerei să facă autofocus continuu
-        width: { ideal: 1280 },  // Cere o lățime de 720p
-        height: { ideal: 720 }   // Cere o înălțime de 720p
-    };
-    
-    html5QrCode.start(videoConstraints, config, onScanSuccess) // Trimitem noile constrângeri
+    // AM ELIMINAT 'videoConstraints' pentru a rezolva eroarea de pornire.
+    // Folosim cea mai simplă metodă de start, care este cea mai compatibilă.
+    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess) // Apel simplificat
         .catch(err => {
-            console.error("Eroare cameră:", err);
-            // Fallback: Încearcă fără videoConstraints dacă a eșuat (unele browsere nu suportă)
-            if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
-                console.warn("Focus/Rezoluția 720p nu este suportată, se încearcă fără...");
-                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-                    .catch(fallbackErr => {
-                        console.error("Eroare cameră (fallback):", fallbackErr);
-                        showToast("Eroare la pornirea camerei.", true);
-                        stopScanner();
-                    });
-            } else {
-                showToast("Eroare la pornirea camerei.", true);
-                stopScanner();
-            }
+            // Acum, orice eroare este o eroare generală (probabil permisiuni)
+            console.error("Eroare la pornirea camerei:", err);
+            showToast("Eroare la pornirea camerei. Verifică permisiunile.", true); // Mesaj de eroare mai clar
+            stopScanner();
         });
 }
 
@@ -67,5 +51,6 @@ function onScanSuccess(decodedText, decodedResult) {
         handleMoveDestinationScan(decodedText);
     }
 }
+
 
 
