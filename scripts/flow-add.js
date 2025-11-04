@@ -185,7 +185,6 @@ function resetAddFlow(navigateToDashboard = false) {
 window.goToAddStep = goToAddStep;
 window.handleProductScan = handleProductScan;
 window.confirmAddQuantity = confirmAddQuantity;
-window.renderAddProductList = renderAddProductList;
 window.removeProductFromAddList = removeProductFromAddList;
 window.handleLocationScan = handleLocationScan;
 window.saveMultiAdd = saveMultiAdd;
