@@ -1,6 +1,11 @@
 // --- Inițializare ---
 document.addEventListener("DOMContentLoaded", () => {
-    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode = new Html5Qrcode("reader", { 
+        rememberLastUsedCamera: true,
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+        }
+    });
     loadInitialStorage(); // Încarcă stocul și apoi preia comenzile
     showPage('page-dashboard');
 
