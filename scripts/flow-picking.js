@@ -179,3 +179,14 @@ async function advancePickingStop() {
 function finishPicking() {
     document.getElementById('picking-content').style.display = 'none';
     document.getElementById('picking-complete').style.display = 'block';
+    setupPickingPageFooter(false);
+    liveOrders = []; 
+    isOrderNotificationHidden = false;
+    setupDashboardNotification();
+}
+
+// ExpuN funcțiile necesare global
+window.setupDashboardNotification = setupDashboardNotification;
+window.hideOrderNotification = hideOrderNotification;
+window.startPickingProcess = startPickingProcess;
+window.advancePickingStop = advancePickingStop;
