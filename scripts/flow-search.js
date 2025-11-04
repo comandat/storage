@@ -114,4 +114,3 @@ function renderSearchResults(items) {
 window.toggleSearchFocus = toggleSearchFocus;
 window.handleFindScan = handleFindScan;
 window.searchProducts = searchProducts;
-window.renderSearchResults = renderSearchResults;
