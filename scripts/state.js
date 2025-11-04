@@ -5,7 +5,7 @@ const GET_STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/get-st
 const GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba5359d-8ecd-4576-b44c-934ac4b661e2";
 
 // --- Starea Aplicației ---
-let html5QrCode;
+let qrScanner;
 let currentScanMode = null; // 'product', 'location', 'find', 'move_product', 'move_destination'
 
 // Stare "Adaugă Produs"
