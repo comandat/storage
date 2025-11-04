@@ -274,8 +274,10 @@ async function saveMoveProduct() {
 }
 
 // ExpuN funcțiile necesare global
-window.goToMoveStep = goToMoveStep;
 window.resetMoveFlow = resetMoveFlow;
+window.goToMoveStep = goToMoveStep;
+window.handleMoveProductScan = handleMoveProductScan;
+window.renderMoveProductList = renderMoveProductList;
 window.removeProductFromMoveList = removeProductFromMoveList;
-window.updateMoveSelection = updateMoveSelection;
-window.saveMoveProduct = saveMoveProduct;
+window.renderMoveSourceList = renderMoveSourceList;
+window.updateMoveSelection = update
