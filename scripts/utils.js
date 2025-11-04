@@ -85,3 +85,6 @@ function showToast(message, isError = false) {
 function showLoading(isLoading) {
     document.getElementById('loading-overlay').style.display = isLoading ? 'flex' : 'none';
 }
+
+// ExpuN funcțiile necesare global
+window.showPage = showPage;
