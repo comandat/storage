@@ -277,7 +277,7 @@ async function saveMoveProduct() {
 window.resetMoveFlow = resetMoveFlow;
 window.goToMoveStep = goToMoveStep;
 window.handleMoveProductScan = handleMoveProductScan;
-window.renderMoveProductList = renderMoveProductList;
 window.removeProductFromMoveList = removeProductFromMoveList;
-window.renderMoveSourceList = renderMoveSourceList;
-window.updateMoveSelection = update
+window.updateMoveSelection = updateMoveSelection; // Aceasta a fost linia cu eroarea
+window.handleMoveDestinationScan = handleMoveDestinationScan;
+window.saveMoveProduct = saveMoveProduct;
