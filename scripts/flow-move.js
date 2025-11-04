@@ -272,3 +272,10 @@ async function saveMoveProduct() {
     showToast(`Mutat ${totalMoved} buc. la ${moveDestinationLocation}`);
     resetMoveFlow(true); 
 }
+
+// ExpuN funcțiile necesare global
+window.goToMoveStep = goToMoveStep;
+window.resetMoveFlow = resetMoveFlow;
+window.removeProductFromMoveList = removeProductFromMoveList;
+window.updateMoveSelection = updateMoveSelection;
+window.saveMoveProduct = saveMoveProduct;
