@@ -88,3 +88,9 @@ function showLoading(isLoading) {
 
 // ExpuN funcțiile necesare global
 window.showPage = showPage;
+window.setupPickingPageFooter = setupPickingPageFooter;
+window.loadFromLocalStorage = loadFromLocalStorage;
+window.saveToLocalStorage = saveToLocalStorage;
+window.formatLocation = formatLocation;
+window.showToast = showToast;
+window.showLoading = showLoading;
