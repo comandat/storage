@@ -111,6 +111,33 @@ async function startScanner(mode) {
 
     try {
         await qrScanner.start();
+
+        // --- MODIFICARE: Aplicare Zoom ---
+        try {
+            if (qrScanner.$video && qrScanner.$video.srcObject) {
+                const track = qrScanner.$video.srcObject.getVideoTracks()[0];
+                const capabilities = track.getCapabilities();
+
+                if ('zoom' in capabilities) {
+                    // Setăm un zoom de 2x (sau maximul permis dacă e mai mic de 2)
+                    const targetZoom = 2; 
+                    const maxZoom = capabilities.zoom.max;
+                    const minZoom = capabilities.zoom.min || 1;
+                    
+                    const zoomValue = Math.max(minZoom, Math.min(targetZoom, maxZoom));
+                    
+                    await track.applyConstraints({ advanced: [{ zoom: zoomValue }] });
+                    console.log(`Zoom aplicat: ${zoomValue} (Max: ${maxZoom}, Min: ${minZoom})`);
+                } else {
+                    console.log("Camera nu suportă zoom (capabilities.zoom).");
+                }
+            }
+        } catch (zoomErr) {
+            console.warn("Eroare la aplicarea zoom-ului:", zoomErr);
+            // Nu oprim scanerul, continuăm fără zoom
+        }
+        // --- SFÂRȘIT MODIFICARE ---
+
     } catch (err) {
         console.error("Eroare la pornirea QrScanner (nimiq):", err);
         showToast("Eroare la pornirea camerei. Verifică permisiunile.", true);
