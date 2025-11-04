@@ -42,12 +42,12 @@ async function startScanner(mode) {
             onDecodeError: onScanError,
             
             // --- MODIFICARE ---
-            // 1. Reactivăm "cutia" de scanare.
-            // Acest lucru concentrează procesorul pe o singură zonă
-            // și ajută enorm la decodarea codurilor dificile.
-            highlightScanRegion: true,
+            // 1. Am DEZACTIVAT (comentat) "cutia" de scanare.
+            // Acest lucru va forța scannerul să analizeze întregul
+            // cadru video, permițând detectarea codurilor mici.
+            // highlightScanRegion: true,
             
-            // 2. Reactivăm conturul codului găsit
+            // 2. Reactivăm conturul codului găsit (acesta rămâne util)
             highlightCodeOutline: true,
             
             // 3. Am ȘTERS funcția 'calculateScanRegion'
