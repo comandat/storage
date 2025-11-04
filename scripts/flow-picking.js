@@ -184,3 +184,7 @@ function finishPicking() {
     isOrderNotificationHidden = false;
     setupDashboardNotification();
 }
+
+// ExpuN funcțiile necesare global
+window.advancePickingStop = advancePickingStop;
+window.hideOrderNotification = hideOrderNotification;
