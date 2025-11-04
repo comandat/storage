@@ -7,6 +7,10 @@ window.GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba535
 window.qrScanner = null;
 window.currentScanMode = null; // 'product', 'location', 'find', 'move_product', 'move_destination'
 
+// NOU: Stare pentru camere
+window.availableCameras = [];
+window.currentCameraIndex = 0;
+
 // Stare "Adaugă Produs"
 window.scannedProductList = []; // Listă de {sku, product, quantity}
 window.scannedLocation = null;
