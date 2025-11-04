@@ -5,23 +5,47 @@ function startScanner(mode) {
     
     // Configurație optimizată pentru viteză
     const config = { 
-        fps: 30, // Am crescut FPS-ul și mai mult
-        qrbox: { width: 250, height: 250 },
+        fps: 20, // 20 este un echilibru bun, 30 poate fi prea mult
+        // OPTIMIZARE: Folosim o funcție pentru un qrbox relativ (70% din lățime)
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+            let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            let qrboxSize = Math.floor(minEdge * 0.7); // 70% din cea mai mică latură
+            return {
+                width: qrboxSize,
+                height: qrboxSize
+            };
+        },
         experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true // FORȚEAZĂ detectorul nativ (MULT MAI RAPID)
+            useBarCodeDetectorIfSupported: true 
         },
         rememberLastUsedCamera: true,
-        // OPTIMIZARE: Spune scanerului să caute DOAR coduri QR
         formatsToSupport: [
             Html5QrcodeSupportedFormats.QR_CODE
         ]
     };
+
+    // OPTIMIZARE: Adăugăm constrângeri video pentru a cere focus continuu
+    const videoConstraints = {
+        facingMode: "environment",
+        focusMode: "continuous" // Cere camerei să facă autofocus continuu
+    };
     
-    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+    html5QrCode.start(videoConstraints, config, onScanSuccess) // Trimitem noile constrângeri
         .catch(err => {
             console.error("Eroare cameră:", err);
-            showToast("Eroare la pornirea camerei.", true);
-            stopScanner();
+            // Fallback: Încearcă fără videoConstraints dacă a eșuat (unele browsere nu suportă)
+            if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
+                console.warn("Focus continuu nu este suportat, se încearcă fără...");
+                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                    .catch(fallbackErr => {
+                        console.error("Eroare cameră (fallback):", fallbackErr);
+                        showToast("Eroare la pornirea camerei.", true);
+                        stopScanner();
+                    });
+            } else {
+                showToast("Eroare la pornirea camerei.", true);
+                stopScanner();
+            }
         });
 }
 
