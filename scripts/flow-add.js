@@ -183,6 +183,10 @@ function resetAddFlow(navigateToDashboard = false) {
 
 // ExpuN funcțiile necesare global
 window.goToAddStep = goToAddStep;
+window.handleProductScan = handleProductScan;
 window.confirmAddQuantity = confirmAddQuantity;
-window.saveMultiAdd = saveMultiAdd;
+window.renderAddProductList = renderAddProductList;
 window.removeProductFromAddList = removeProductFromAddList;
+window.handleLocationScan = handleLocationScan;
+window.saveMultiAdd = saveMultiAdd;
+window.resetAddFlow = resetAddFlow;
