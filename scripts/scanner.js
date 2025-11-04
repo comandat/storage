@@ -5,16 +5,10 @@ function startScanner(mode) {
     
     // Configurație optimizată pentru viteză
     const config = { 
-        fps: 20, // 20 este un echilibru bun, 30 poate fi prea mult
-        // OPTIMIZARE: Folosim o funcție pentru un qrbox relativ (70% din lățime)
-        qrbox: (viewfinderWidth, viewfinderHeight) => {
-            let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            let qrboxSize = Math.floor(minEdge * 0.7); // 70% din cea mai mică latură
-            return {
-                width: qrboxSize,
-                height: qrboxSize
-            };
-        },
+        fps: 20, // 20 este un echilibru bun
+        // OPTIMIZARE: Am ELIMINAT 'qrbox'.
+        // Fără 'qrbox', scanerul va analiza ÎNTREGUL ecran,
+        // permițând scanarea codurilor mici sau aflate la distanță.
         experimentalFeatures: {
             useBarCodeDetectorIfSupported: true 
         },
@@ -30,13 +24,13 @@ function startScanner(mode) {
         focusMode: "continuous" // Cere camerei să facă autofocus continuu
     };
     
-    html5QrCode.start(videoConstraints, config, onScanSuccess) // Trimitem noile constrângeri
+    html5Qrcode.start(videoConstraints, config, onScanSuccess) // Trimitem noile constrângeri
         .catch(err => {
             console.error("Eroare cameră:", err);
             // Fallback: Încearcă fără videoConstraints dacă a eșuat (unele browsere nu suportă)
             if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
                 console.warn("Focus continuu nu este suportat, se încearcă fără...");
-                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                html5Qrcode.start({ facingMode: "environment" }, config, onScanSuccess)
                     .catch(fallbackErr => {
                         console.error("Eroare cameră (fallback):", fallbackErr);
                         showToast("Eroare la pornirea camerei.", true);
@@ -71,3 +65,4 @@ function onScanSuccess(decodedText, decodedResult) {
         handleMoveDestinationScan(decodedText);
     }
 }
+
