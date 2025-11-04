@@ -34,6 +34,40 @@ async function startScanner(mode) {
         return;
     }
 
+    // --- MODIFICARE: Selectare cameră ---
+    let preferredCamId = null;
+    try {
+        // 1. Listăm toate camerele video (true = cere și etichetele)
+        const cameras = await QrScanner.listCameras(true);
+        
+        // 2. Filtrăm doar camerele de pe spate
+        const rearCameras = cameras.filter(cam => 
+            /rear|back|environment/i.test(cam.label)
+        );
+
+        console.log("Camere spate disponibile:", rearCameras);
+
+        if (rearCameras.length > 1) {
+            // 3. Am găsit mai multe camere pe spate. O alegem pe ULTIMA.
+            // (Adesea, prima e "wide", următoarele sunt "telephoto" sau "ultrawide")
+            preferredCamId = rearCameras[rearCameras.length - 1].id;
+            console.log(`Camere multiple detectate. Se folosește camera secundară: ${preferredCamId}`);
+        } else if (rearCameras.length === 1) {
+            // 4. Doar o cameră pe spate, o folosim pe aceea.
+            preferredCamId = rearCameras[0].id;
+            console.log(`O singură cameră spate detectată: ${preferredCamId}`);
+        } else {
+            // 5. Fallback dacă nu găsim nicio cameră cu eticheta "back"
+            console.log("Nicio cameră spate nu a fost găsită după etichetă. Se folosește 'environment'.");
+            preferredCamId = 'environment';
+        }
+    } catch (e) {
+        console.error("Eroare la listarea camerelor, se folosește 'environment'.", e);
+        preferredCamId = 'environment'; // Fallback
+    }
+    // --- SFÂRȘIT MODIFICARE ---
+
+
     // Inițializează scannerul
     qrScanner = new QrScanner(
         videoElem,
@@ -41,28 +75,21 @@ async function startScanner(mode) {
         {
             onDecodeError: onScanError,
             
-            // --- MODIFICARE ---
-            // 1. Am DEZACTIVAT (comentat) "cutia" de scanare.
-            // Acest lucru va forța scannerul să analizeze întregul
-            // cadru video, permițând detectarea codurilor mici.
-            // highlightScanRegion: true,
+            // Am lăsat 'highlightScanRegion' comentat (din pasul anterior)
+            // pentru a scana tot ecranul
+            // highlightScanRegion: true, 
             
-            // 2. Reactivăm conturul codului găsit (acesta rămâne util)
             highlightCodeOutline: true,
             
-            // 3. Am ȘTERS funcția 'calculateScanRegion'
-            // pentru a lăsa biblioteca să-și folosească
-            // funcția implicită (cutia din centru).
+            returnDetailedScanResult: true,
             
-            // 4. Necesara pentru a primi obiectul { data: "..." }
-            returnDetailedScanResult: true 
+            // --- MODIFICARE: Folosim ID-ul camerei selectate ---
+            preferredCamera: preferredCamId
         }
     );
 
     // --- MODIFICARE PENTRU BORDURA NEAGRĂ ---
     // Această setare este VITALĂ și o păstrăm.
-    // Combinată cu scanarea regională (cutia), ar trebui
-    // să funcționeze acum.
     qrScanner.setInversionMode('both');
     // --- SFÂRȘIT MODIFICARE ---
 
