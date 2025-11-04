@@ -53,7 +53,6 @@ async function applyZoom() {
 async function startScanner(mode) {
     currentScanMode = mode;
     document.getElementById('scanner-modal').classList.add('active');
-    document.getElementById('switch-cam-button').style.display = 'none'; // Ascunde inițial
     
     const videoElem = document.getElementById('qr-video');
     if (!videoElem) {
@@ -62,55 +61,61 @@ async function startScanner(mode) {
         return;
     }
 
-    // --- MODIFICARE: Listare, Logare și Selectare Cameră ---
+    // --- MODIFICARE: Selectare cameră "Ultra" ---
     let preferredCamId = null;
-    const targetCameraLabelFragment = "superangurlar";
+    const targetLabelUltra = "ultra";
+    const targetLabelSuper = "superangurlar";
 
     try {
-        window.availableCameras = await QrScanner.listCameras(true);
+        const cameras = await QrScanner.listCameras(true);
         
-        // --- LOGARE ÎN CONSOLĂ ---
+        // --- Logare în consolă (păstrată pentru debug) ---
         console.log("--- Camere Disponibile ---");
-        window.availableCameras.forEach((cam, index) => {
+        cameras.forEach((cam, index) => {
             console.log(`[${index}]: ${cam.label} (ID: ${cam.id})`);
         });
         console.log("---------------------------");
-        // --- SFÂRȘIT LOGARE ---
 
-        if (window.availableCameras.length > 1) {
-            document.getElementById('switch-cam-button').style.display = 'flex';
-        }
-
-        if (window.availableCameras.length > 0) {
-            // 1. Căutăm camera "superangurlar"
-            let specificCameraIndex = window.availableCameras.findIndex(cam => 
-                cam.label.toLowerCase().includes(targetCameraLabelFragment)
+        if (cameras.length > 0) {
+            // 1. Căutăm "ultra"
+            let targetCamera = cameras.find(cam => 
+                cam.label.toLowerCase().includes(targetLabelUltra)
             );
 
-            if (specificCameraIndex !== -1) {
-                // Am găsit-o
-                window.currentCameraIndex = specificCameraIndex;
-                console.log(`Găsit camera țintă "${targetCameraLabelFragment}". Se pornește cu index ${window.currentCameraIndex}.`);
+            if (targetCamera) {
+                // Am găsit "ultra"
+                preferredCamId = targetCamera.id;
+                console.log(`Găsit camera "ultra". Se folosește: ${targetCamera.label}`);
             } else {
-                // 2. Fallback: Căutăm ultima cameră de spate
-                const rearCameras = window.availableCameras
-                    .map((cam, index) => ({ ...cam, index })) // Păstrăm indexul original
-                    .filter(cam => /rear|back|environment/i.test(cam.label));
-                
-                if (rearCameras.length > 0) {
-                    // Folosim ultima cameră de spate din listă
-                    window.currentCameraIndex = rearCameras[rearCameras.length - 1].index;
-                    console.log(`Camera țintă nu a fost găsită. Fallback la ultima cameră spate (Index: ${window.currentCameraIndex}).`);
+                // 2. Căutăm "superangurlar"
+                targetCamera = cameras.find(cam => 
+                    cam.label.toLowerCase().includes(targetLabelSuper)
+                );
+                if (targetCamera) {
+                    preferredCamId = targetCamera.id;
+                    console.log(`Găsit camera "superangurlar". Se folosește: ${targetCamera.label}`);
                 } else {
-                    // 3. Fallback: Folosim prima cameră
-                    window.currentCameraIndex = 0;
-                    console.log("Nicio cameră spate detectată. Fallback la prima cameră (Index: 0).");
+                    // 3. Fallback: Căutăm ultima cameră de SPATE
+                    const rearCameras = cameras.filter(cam => 
+                        /rear|back|environment/i.test(cam.label) && 
+                        !/front|user/i.test(cam.label)
+                    );
+                    
+                    if (rearCameras.length > 0) {
+                        // Folosim ultima cameră de spate (adesea telephoto sau ultrawide)
+                        targetCamera = rearCameras[rearCameras.length - 1];
+                        preferredCamId = targetCamera.id;
+                        console.log(`Nicio cameră "ultra" sau "superangurlar" găsită. Fallback la ultima cameră spate: ${targetCamera.label}`);
+                    } else {
+                        // 4. Fallback final
+                        preferredCamId = 'environment';
+                        console.log("Nicio cameră specifică găsită. Se folosește default 'environment'.");
+                    }
                 }
             }
-            preferredCamId = window.availableCameras[window.currentCameraIndex].id;
         } else {
-            console.warn("Nicio cameră nu a fost găsită. Se folosește 'environment' (default).");
             preferredCamId = 'environment';
+            console.warn("Nicio cameră nu a fost găsită. Se folosește 'environment'.");
         }
         
     } catch (e) {
@@ -151,35 +156,6 @@ function stopScanner() {
         qrScanner = null;
     }
     document.getElementById('scanner-modal').classList.remove('active');
-    document.getElementById('switch-cam-button').style.display = 'none'; // Ascunde butonul
-    
-    // Resetează starea camerelor
-    window.availableCameras = [];
-    window.currentCameraIndex = 0;
-}
-
-/**
- * Funcție nouă pentru a schimba camera
- */
-async function switchCamera() {
-    if (!qrScanner || window.availableCameras.length <= 1) {
-        return;
-    }
-
-    // Calculează următorul index
-    window.currentCameraIndex = (window.currentCameraIndex + 1) % window.availableCameras.length;
-    
-    const newCam = window.availableCameras[window.currentCameraIndex];
-    console.log(`Schimbare cameră la [${window.currentCameraIndex}]: ${newCam.label}`);
-    showToast(`Cameră: ${newCam.label.split('(')[0]}`); // Afișează un toast scurt
-
-    try {
-        await qrScanner.setCamera(newCam.id);
-        await applyZoom(); // Reaplică zoom pe noua cameră
-    } catch (err) {
-        console.error("Eroare la schimbarea camerei:", err);
-        showToast("Eroare la schimbarea camerei.", true);
-    }
 }
 
 /**
@@ -208,4 +184,4 @@ function onScanSuccess(decodedText, decodedResult) {
 // Expun funcțiile necesare global
 window.startScanner = startScanner;
 window.stopScanner = stopScanner;
-window.switchCamera = switchCamera; // Expune noua funcție
+// Am șters 'window.switchCamera'
