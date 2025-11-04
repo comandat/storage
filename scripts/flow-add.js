@@ -180,3 +180,9 @@ function resetAddFlow(navigateToDashboard = false) {
         showPage('page-dashboard');
     }
 }
+
+// ExpuN funcțiile necesare global
+window.goToAddStep = goToAddStep;
+window.confirmAddQuantity = confirmAddQuantity;
+window.saveMultiAdd = saveMultiAdd;
+window.removeProductFromAddList = removeProductFromAddList;
