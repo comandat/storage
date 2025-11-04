@@ -149,4 +149,33 @@ async function renderCurrentPickingStop() {
 
 // Funcția toggleProductDisplay a fost ȘTEARSĂ
 
-async function advancePickingStop
+async function advancePickingStop() {
+    if (currentRouteIndex >= pickingRoutes.length) return;
+    
+    const route = pickingRoutes[currentRouteIndex];
+    const stop = route.stops[currentStopIndex];
+
+    const inventory = loadFromLocalStorage('inventoryLocations');
+    if (stop.locationKey !== "N/A" && inventory[stop.sku] && inventory[stop.sku][stop.locationKey]) {
+         inventory[stop.sku][stop.locationKey] -= stop.quantityToPick;
+         if (inventory[stop.sku][stop.locationKey] <= 0) {
+             delete inventory[stop.sku][stop.locationKey];
+         }
+         saveToLocalStorage('inventoryLocations', inventory);
+         
+         await sendStorageUpdate(stop.sku, stop.locationKey, "scadere", stop.quantityToPick);
+    } else if (stop.locationKey === "N/A") {
+        console.warn(`Nu s-a putut scădea stocul pentru ${stop.sku} - locație N/A`);
+    }
+
+    currentStopIndex++;
+    if (currentStopIndex >= route.stops.length) {
+        currentRouteIndex++;
+        currentStopIndex = 0;
+    }
+    renderCurrentPickingStop();
+}
+
+function finishPicking() {
+    document.getElementById('picking-content').style.display = 'none';
+    document.getElementById('picking-complete').style.display = 'block';
