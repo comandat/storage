@@ -109,3 +109,9 @@ function renderSearchResults(items) {
         `;
     }).join('');
 }
+
+// ExpuN funcțiile necesare global
+window.toggleSearchFocus = toggleSearchFocus;
+window.handleFindScan = handleFindScan;
+window.searchProducts = searchProducts;
+window.renderSearchResults = renderSearchResults;
