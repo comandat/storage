@@ -4,7 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rememberLastUsedCamera: true,
         experimentalFeatures: {
             useBarCodeDetectorIfSupported: true
-        }
+        },
+        // OPTIMIZARE: Spune bibliotecii să caute DOAR coduri QR
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE
+        ]
     });
     loadInitialStorage(); // Încarcă stocul și apoi preia comenzile
     showPage('page-dashboard');
@@ -27,3 +31,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setează starea inițială a footer-ului
     setupPickingPageFooter(false);
 });
+
