@@ -1,8 +1,7 @@
 // --- Constante API ---
-// const WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/39e78a55-36c9-4948-aa2d-d9301c996562-test"; // ELIMINAT
-const STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/storage-update";
-const GET_STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/get-storage";
-const GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba5359d-8ecd-4576-b44c-934ac4b661e2";
+window.STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/storage-update";
+window.GET_STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/get-storage";
+window.GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba5359d-8ecd-4576-b44c-934ac4b661e2";
 
 // --- Starea Aplicației ---
 window.qrScanner = null;
