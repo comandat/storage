@@ -5,12 +5,16 @@ function startScanner(mode) {
     
     // Configurație optimizată pentru viteză
     const config = { 
-        fps: 15, // Am crescut FPS-ul pentru o imagine mai fluidă
+        fps: 30, // Am crescut FPS-ul și mai mult
         qrbox: { width: 250, height: 250 },
         experimentalFeatures: {
             useBarCodeDetectorIfSupported: true // FORȚEAZĂ detectorul nativ (MULT MAI RAPID)
         },
-        rememberLastUsedCamera: true
+        rememberLastUsedCamera: true,
+        // OPTIMIZARE: Spune scanerului să caute DOAR coduri QR
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE
+        ]
     };
     
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
