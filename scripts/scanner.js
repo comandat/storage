@@ -62,6 +62,13 @@ async function startScanner(mode) {
         }
     );
 
+    // --- MODIFICARE PENTRU CODURILE CU BORDURĂ NEAGRĂ ---
+    // Spunem scanner-ului să încerce și modul inversat (alb-pe-negru).
+    // Acest lucru ajută la citirea codurilor care nu respectă
+    // standardul "quiet zone" (margine albă).
+    qrScanner.setInversionMode('both');
+    // --- SFÂRȘIT MODIFICARE ---
+
     try {
         await qrScanner.start();
     } catch (err) {
