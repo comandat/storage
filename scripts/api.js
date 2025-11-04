@@ -139,3 +139,10 @@ async function getProductDetails(sku) {
     
     return productMap[sku];
 }
+
+// ExpuN funcțiile necesare global
+window.loadInitialStorage = loadInitialStorage;
+window.fetchAndSetupOrders = fetchAndSetupOrders;
+window.sendStorageUpdate = sendStorageUpdate;
+window.fetchProductDetailsBatch = fetchProductDetailsBatch;
+window.getProductDetails = getProductDetails;
