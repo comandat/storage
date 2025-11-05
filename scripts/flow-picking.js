@@ -126,6 +126,20 @@ async function renderCurrentPickingStop() {
         return;
     }
     const route = pickingRoutes[currentRouteIndex];
+    
+    // --- Adăugat verificare pentru rute goale ---
+    if (!route || route.stops.length === 0) {
+        // Dacă ruta e goală, o ștergem și încercăm să randăm din nou
+        if (route) {
+            pickingRoutes.splice(currentRouteIndex, 1);
+        }
+        // Nu incrementăm indexul, deoarece următoarea rută va lua locul acesteia
+        currentStopIndex = 0;
+        renderCurrentPickingStop(); // Încearcă din nou cu următoarea rută
+        return;
+    }
+    // --- Sfârșit verificare ---
+
     const stop = route.stops[currentStopIndex];
     
     const locationEl = document.getElementById('stop-location');
@@ -176,6 +190,51 @@ async function advancePickingStop() {
     renderCurrentPickingStop();
 }
 
+// --- NOUA FUNCȚIE ADĂUGATĂ ---
+async function skipPickingStop() {
+    if (currentRouteIndex >= pickingRoutes.length) {
+        finishPicking();
+        return;
+    }
+
+    const route = pickingRoutes[currentRouteIndex];
+    if (route.stops.length === 0) {
+        // Rută goală, curățăm și mergem mai departe
+        pickingRoutes.splice(currentRouteIndex, 1);
+        currentStopIndex = 0;
+        renderCurrentPickingStop();
+        return;
+    }
+
+    // 1. Ia stop-ul curent și îl elimină din lista curentă
+    const stopToSkip = route.stops.splice(currentStopIndex, 1)[0];
+
+    // 2. Adaugă stop-ul la finalul ultimei rute
+    if (pickingRoutes.length > 0) {
+         // Adaugă la ultima rută existentă
+        pickingRoutes[pickingRoutes.length - 1].stops.push(stopToSkip);
+    }
+
+    // 3. Verifică dacă ruta curentă a devenit goală
+    if (route.stops.length === 0) {
+        pickingRoutes.splice(currentRouteIndex, 1);
+        currentStopIndex = 0;
+        // nu incrementăm currentRouteIndex, deoarece următoarea rută va lua locul acesteia
+    } 
+    // 4. Verifică dacă eram la capătul listei în ruta curentă
+    else if (currentStopIndex >= route.stops.length) {
+        // Eram la ultimul item, trecem la următoarea rută
+        currentRouteIndex++;
+        currentStopIndex = 0;
+    }
+    // 5. Dacă eram la mijlocul listei, currentStopIndex e acum pe următorul item,
+    // deci nu facem nimic la indecși.
+
+    // 6. Re-randează
+    renderCurrentPickingStop();
+}
+// --- SFÂRȘIT FUNCȚIE NOUĂ ---
+
 function finishPicking() {
     document.getElementById('picking-content').style.display = 'none';
     document.getElementById('picking-complete').style.display = 'block';
@@ -190,3 +249,4 @@ window.setupDashboardNotification = setupDashboardNotification;
 window.hideOrderNotification = hideOrderNotification;
 window.startPickingProcess = startPickingProcess;
 window.advancePickingStop = advancePickingStop;
+window.skipPickingStop = skipPickingStop; // <-- Am adăugat exportul aici
