@@ -84,18 +84,18 @@
                     </div>
                 </a>
                 
-                <a class="group block p-8 bg-card-light dark:bg-card-dark rounded-3xl transition-all duration-300 hover:scale-[1.03] hover:shadow-xl dark:hover:bg-card-dark/80" href="#" onclick="showPage('page-move-product')">
+                <a class="group block p-8 bg-card-light dark:bg-card-dark rounded-3xl transition-all duration-300 hover:scale-[1.03] hover:shadow-xl dark:hover:bg-card-dark/80" href="#" onclick="showPage('page-delete-product')">
                     <div class="flex items-center space-x-6">
                         <div class="p-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-colors">
-                            <span class="material-icons-outlined text-4xl text-text-light dark:text-text-dark">compare_arrows</span>
+                            <span class="material-icons-outlined text-4xl text-red-600 dark:text-red-400">delete_sweep</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-text-light dark:text-text-dark">Mută Produs</h3>
-                            <p class="text-sm text-subtext-light dark:text-subtext-dark mt-1">Mută stocul între locații</p>
+                            <h3 class="text-xl font-bold text-text-light dark:text-text-dark">Șterge Produs</h3>
+                            <p class="text-sm text-subtext-light dark:text-subtext-dark mt-1">Șterge produse dintr-o locație</p>
                         </div>
                     </div>
                 </a>
-            </main>
+                </main>
         </div>
 
         <div id="page-find-product" class="page"></div>
@@ -244,97 +244,72 @@
                 </div>
         </div>
 
-        <div id="page-move-product" class="page p-6 relative">
+        <div id="page-delete-product" class="page p-6 relative">
             <button onclick="showPage('page-dashboard')" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
                 <span class="material-icons-outlined text-3xl">close</span>
             </button>
             
-            <div id="move-step-1-products" class="animate-slide-in mt-8">
+            <div id="delete-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
-                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează unul sau mai multe produse pe care vrei să le muți.</p>
+                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează produsele pe care vrei să le ștergi.</p>
                 
-                <div id="move-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
+                <div id="delete-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
                     </div>
 
-                <button onclick="startScanner('move_product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
+                <button onclick="startScanner('delete_product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
                     <span class="material-icons-outlined">qr_code_scanner</span>
                     <span>Scanează Produs (SKU)</span>
                 </button>
-                <button id="move-to-source-btn" onclick="goToMoveStep(2)" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg hidden">
-                    <span>Selectează Sursele</span>
+                <button id="delete-to-location-btn" onclick="goToDeleteStep(2)" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg hidden">
+                    <span>Scanează Locația</span>
                     <span class="material-icons-outlined">arrow_forward</span>
                 </button>
             </div>
 
-            <div id="move-step-2-source" class="hidden animate-slide-in mt-8">
-                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Selectează Sursele</h2>
-                
-                <p class="text-subtext-light dark:text-subtext-dark mb-4 text-center">Introdu cantitatea de mutat din fiecare locație:</p>
-                
-                <div id="move-source-list" class="space-y-6 mb-6">
-                    </div>
-                
-                <button onclick="goToMoveStep(3)" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg">
-                    <span>Continuă</span>
-                    <span class="material-icons-outlined">arrow_forward</span>
-                </button>
-                <button onclick="resetMoveFlow(false)" class="w-full text-center text-primary mt-6">
-                    Rescanează Produsele
-                </button>
-            </div>
-
-            <div id="move-step-3-destination" class="hidden animate-slide-in mt-8">
-                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 3: Scanează Destinația</h2>
+            <div id="delete-step-2-location" class="hidden animate-slide-in mt-8">
+                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Scanează Locația</h2>
                 
                 <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-6 text-center">
-                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Sumar de mutat:</p>
-                    <div id="move-summary-text" class="text-text-light dark:text-text-dark font-semibold text-lg">...</div>
+                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Produse de șters:</p>
+                    <div id="delete-summary-text" class="text-text-light dark:text-text-dark font-semibold text-lg">...</div>
                 </div>
 
-                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Acum scanează codul QR al locației destinație.</p>
-                <button onclick="startScanner('move_destination')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary">
+                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Acum scanează codul QR al locației de pe care vrei să ștergi.</p>
+                <button onclick="startScanner('delete_location')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary">
                     <span class="material-icons-outlined">pin_drop</span>
-                    <span>Scanează Locația Destinație</span>
+                    <span>Scanează Locația</span>
                 </button>
-                <button onclick="goToMoveStep(2)" class="w-full text-center text-primary mt-6">
-                    Modifică Sursele
+                <button onclick="goToDeleteStep(1)" class="w-full text-center text-primary mt-6">
+                    Modifică Produsele
                 </button>
             </div>
             
-            <div id="move-step-4-confirm" class="hidden animate-slide-in mt-8">
-                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 4: Confirmă Mutarea</h2>
+            <div id="delete-step-3-confirm" class="hidden animate-slide-in mt-8">
+                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 3: Confirmă Ștergerea</h2>
                 
                 <div class="bg-card-light dark:bg-card-dark p-5 rounded-2xl shadow-lg space-y-4">
                     <div>
-                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Produse:</h4>
-                        <div id="move-confirm-product" class="text-lg font-bold text-text-light dark:text-text-dark">...</div>
+                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Produse (SKU):</h4>
+                        <div id="delete-confirm-product" class="text-lg font-bold text-text-light dark:text-text-dark">...</div>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Cantitate Totală:</h4>
-                        <div id="move-confirm-quantity" class="text-2xl font-bold text-primary">...</div>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Din Locațiile:</h4>
-                        <ul id="move-confirm-sources" class="text-sm text-text-light dark:text-text-dark list-disc list-inside">...</ul>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Spre Locația:</h4>
-                        <div id="move-confirm-destination" class="text-lg font-bold text-green-600">...</div>
+                        <h4 class="text-sm font-semibold text-subtext-light dark:text-subtext-dark mb-1">Din Locația:</h4>
+                        <div id="delete-confirm-location" class="text-lg font-bold text-red-600">...</div>
                     </div>
                 </div>
 
-                <button onclick="saveMoveProduct()" class="w-full bg-green-600 text-white font-bold py-5 rounded-2xl flex items-center justify-center space-x-2 text-xl shadow-lg mt-8">
-                    <span class="material-icons-outlined">check_circle</span>
-                    <span>Confirmă Mutarea</span>
+                <button onclick="saveDeleteProduct()" class="w-full bg-red-600 text-white font-bold py-5 rounded-2xl flex items-center justify-center space-x-2 text-xl shadow-lg mt-8">
+                    <span class="material-icons-outlined">delete_forever</span>
+                    <span>Confirmă Ștergerea</span>
                 </button>
-                 <button onclick="resetMoveFlow(true)" class="w-full text-center text-primary mt-6">
+                 <button onclick="resetDeleteFlow(true)" class="w-full text-center text-primary mt-6">
                     Anulează
                 </button>
             </div>
         </div>
-
-
-    </div> <div id="floating-order-bubble" class="hidden" onclick="showPage('page-picking')">
+        </div> 
+    
+    <div id="floating-order-bubble" class="hidden" onclick="showPage('page-picking')">
         <span class="material-icons-outlined">notifications_active</span>
         <span id="floating-order-count">0</span>
     </div>
@@ -378,7 +353,7 @@
     <script type="module" src="scripts/scanner.js"></script> 
     <script type="module" src="scripts/flow-search.js"></script>
     <script type="module" src="scripts/flow-add.js"></script>
-    <script type="module" src="scripts/flow-move.js"></script>
+    <script type="module" src="scripts/flow-delete.js"></script>
     <script type="module" src="scripts/flow-picking.js"></script>
     <script type="module" src="scripts/main.js"></script>
 </body>
