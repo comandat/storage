@@ -56,21 +56,51 @@ function saveToLocalStorage(key, data) {
 }
 
 // --- Funcții Utilitare UI ---
+
+// --- START MODIFICARE ---
+/**
+ * Formatează o cheie de locație (ex: "1,2,3" sau "1,2,3,4") într-un format lizibil.
+ * @param {string} locationKey - Cheia locației (ex: "1,2,3" sau "1,2,3,4")
+ * @param {boolean} large - Dacă să folosească formatul mare (pentru picking/confirmare)
+ * @returns {string} HTML formatat
+ */
 function formatLocation(locationKey, large = false) {
     const parts = locationKey.split(',');
-    if (parts.length === 3) {
-        if (large) {
-            // Format mare pentru paginile de picking și adăugare
+    
+    if (large) {
+        // --- Format MARE ---
+        if (parts.length === 3) {
+            // Format vechi (Rand, Deschidere, Poliță)
             return `
                 <span class="block">Rand: <span class="text-4xl">${parts[0]}</span></span>
                 <span class="block">Deschidere: <span class="text-4xl">${parts[1]}</span></span>
                 <span class="block">Poliță: <span class="text-4xl">${parts[2]}</span></span>
             `;
+        } else if (parts.length === 4) {
+            // Format nou (cu Cutie)
+            return `
+                <span class="block">Rand: <span class="text-4xl">${parts[0]}</span></span>
+                <span class="block">Deschidere: <span class="text-4xl">${parts[1]}</span></span>
+                <span class="block">Poliță: <span class="text-4xl">${parts[2]}</span></span>
+                <span class="block text-primary">Cutie: <span class="text-4xl">${parts[3]}</span></span>
+            `;
         }
-        return `Rand: <span class="font-bold">${parts[0]}</span>, Deschidere: <span class="font-bold">${parts[1]}</span>, Poliță: <span class="font-bold">${parts[2]}</span>`;
+    } else {
+        // --- Format MIC (pentru liste) ---
+        if (parts.length === 3) {
+            // Format vechi
+            return `Rand: <span class="font-bold">${parts[0]}</span>, Deschidere: <span class="font-bold">${parts[1]}</span>, Poliță: <span class="font-bold">${parts[2]}</span>`;
+        } else if (parts.length === 4) {
+            // Format nou (cu Cutie) - am adăugat text-primary pentru a evidenția cutia
+            return `Rand: <span class="font-bold">${parts[0]}</span>, Deschidere: <span class="font-bold">${parts[1]}</span>, Poliță: <span class="font-bold">${parts[2]}</span>, <span class="font-bold text-primary">Cutie: ${parts[3]}</span>`;
+        }
     }
+    
+    // Fallback dacă formatul e necunoscut
     return locationKey;
 }
+// --- FINAL MODIFICARE ---
+
 
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
