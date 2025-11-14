@@ -159,7 +159,7 @@ function stopScanner() {
 }
 
 /**
- * Funcția originală onScanSuccess (nemodificată)
+ * Funcția originală onScanSuccess (MODIFICATĂ)
  */
 function onScanSuccess(decodedText, decodedResult) {
     stopScanner();
@@ -168,17 +168,19 @@ function onScanSuccess(decodedText, decodedResult) {
         navigator.vibrate(100);
     }
     
+    // START MODIFICARE
     if (currentScanMode === 'product') {
         handleProductScan(decodedText);
     } else if (currentScanMode === 'location') {
         handleLocationScan(decodedText);
     } else if (currentScanMode === 'find') {
         handleFindScan(decodedText);
-    } else if (currentScanMode === 'move_product') {
-        handleMoveProductScan(decodedText);
-    } else if (currentScanMode === 'move_destination') {
-        handleMoveDestinationScan(decodedText);
+    } else if (currentScanMode === 'delete_product') {
+        handleDeleteProductScan(decodedText);
+    } else if (currentScanMode === 'delete_location') {
+        handleDeleteLocationScan(decodedText);
     }
+    // FINAL MODIFICARE
 }
 
 // Expun funcțiile necesare global
