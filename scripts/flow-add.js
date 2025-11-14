@@ -181,6 +181,21 @@ function resetAddFlow(navigateToDashboard = false) {
     }
 }
 
+function handleCancelAddFlow() {
+    // Verifică dacă suntem la Pasul 1 (lista de produse)
+    const step1Active = !document.getElementById('add-step-1-products').classList.contains('hidden');
+    
+    if (step1Active) {
+        // Dacă suntem la pasul 1, ieșim de tot (comportamentul vechi)
+        resetAddFlow(true);
+    } else {
+        // Dacă suntem la pasul 1b, 2, or 3, ne întoarcem la pasul 1 (lista de produse)
+        // și resetăm produsul scanat curent (dacă există)
+        currentScannedProduct = null;
+        goToAddStep(1);
+    }
+}
+
 // ExpuN funcțiile necesare global
 window.goToAddStep = goToAddStep;
 window.handleProductScan = handleProductScan;
