@@ -251,7 +251,7 @@
             
             <div id="delete-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
-                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează produsele pe care vrei să le ștergi.</p>
+                <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează un produs pentru a-i seta cantitatea de șters.</p>
                 
                 <div id="delete-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
                     </div>
@@ -266,11 +266,30 @@
                 </button>
             </div>
 
+            <div id="delete-step-1b-quantity" class="hidden animate-slide-in mt-8">
+                <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Setează Cantitatea de Șters</h2>
+                
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-6 text-center">
+                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Produs (SKU):</p>
+                    <div id="delete-quantity-sku" class="text-text-light dark:text-text-dark font-semibold text-lg font-mono">...</div>
+                </div>
+    
+                <label for="delete-quantity-input" class="block text-sm font-medium text-subtext-light dark:text-subtext-dark mb-2">Cantitate de șters:</label>
+                <input type="number" id="delete-quantity-input" value="1" min="1" class="w-full p-4 text-lg rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-text-dark text-center">
+    
+                <button onclick="confirmDeleteQuantity()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg mt-6">
+                    <span>Setează Cantitatea</span>
+                    <span class="material-icons-outlined">check_circle</span>
+                </button>
+                <button onclick="goToDeleteStep(1)" class="w-full text-center text-primary mt-4">
+                    Anulează
+                </button>
+            </div>
             <div id="delete-step-2-location" class="hidden animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 2: Scanează Locația</h2>
                 
                 <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl mb-6 text-center">
-                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Produse de șters:</p>
+                    <p class="text-sm text-subtext-light dark:text-subtext-dark">Sumar de șters:</p>
                     <div id="delete-summary-text" class="text-text-light dark:text-text-dark font-semibold text-lg">...</div>
                 </div>
 
