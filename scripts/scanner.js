@@ -15,12 +15,14 @@ function onScanSuccessAdapter(result) {
  * Funcție adaptor pentru erori.
  */
 function onScanError(error) {
-    // Putem ignora "No QR code found"
+    // Ignorăm "No QR code found" complet (fără consolă, fără toast)
     if (error === QrScanner.NO_QR_CODE_FOUND) {
         return;
     }
-    console.error("Eroare QrScanner:", error);
-    showToast(`Eroare scanare: ${error}`, true);
+    
+    // Pentru alte erori, le afișăm doar în consolă, FĂRĂ toast (pop-up)
+    console.error("Eroare QrScanner (non-fatal):", error);
+    // showToast(`Eroare scanare: ${error}`, true); // <- Am comentat această linie
 }
 
 /**
