@@ -204,3 +204,4 @@ window.removeProductFromAddList = removeProductFromAddList;
 window.handleLocationScan = handleLocationScan;
 window.saveMultiAdd = saveMultiAdd;
 window.resetAddFlow = resetAddFlow;
+window.handleCancelAddFlow = handleCancelAddFlow;
