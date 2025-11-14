@@ -5,7 +5,8 @@ window.GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba535
 
 // --- Starea Aplicației ---
 window.qrScanner = null;
-window.currentScanMode = null; // 'product', 'location', 'find', 'move_product', 'move_destination'
+// MODIFICAT: Scan modes
+window.currentScanMode = null; // 'product', 'location', 'find', 'delete_product', 'delete_location'
 
 // NOU: Stare pentru camere
 window.availableCameras = [];
@@ -16,10 +17,10 @@ window.scannedProductList = []; // Listă de {sku, product, quantity}
 window.scannedLocation = null;
 window.currentScannedProduct = null; // NOU: {sku, product} - produsul scanat curent
 
-// Stare "Mută Produs"
-window.moveProductList = []; // Listă de {sku, product}
-window.moveSourceSelections = {}; // Format: { "SKU": { "loc": cantitate } }
-window.moveDestinationLocation = null;
+// START MODIFICARE: Stare "Mută Produs" înlocuită cu Stare "Șterge Produs"
+window.deleteProductList = []; // Listă de {sku, product}
+window.deleteLocation = null;
+// FINAL MODIFICARE
 
 // Stare Dashboard
 window.isOrderNotificationHidden = false;
