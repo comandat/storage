@@ -210,6 +210,21 @@ async function saveDeleteProduct() {
     resetDeleteFlow(true); 
 }
 
+function handleCancelDeleteFlow() {
+    // Verifică dacă suntem la Pasul 1 (lista de produse)
+    const step1Active = !document.getElementById('delete-step-1-products').classList.contains('hidden');
+    
+    if (step1Active) {
+        // Dacă suntem la pasul 1, ieșim de tot (comportamentul vechi)
+        resetDeleteFlow(true);
+    } else {
+        // Dacă suntem la pasul 1b, 2, or 3, ne întoarcem la pasul 1 (lista de produse)
+        // și resetăm produsul scanat curent (dacă există)
+        currentScannedProductForDelete = null;
+        goToDeleteStep(1);
+    }
+}
+
 // Expun funcțiile necesare global
 window.resetDeleteFlow = resetDeleteFlow;
 window.goToDeleteStep = goToDeleteStep;
