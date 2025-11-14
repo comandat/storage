@@ -24,9 +24,11 @@ function showPage(pageId) {
     if (pageId === 'page-add-product') {
         resetAddFlow(false);
     }
-     if (pageId === 'page-move-product') {
-        resetMoveFlow(false);
+     // START MODIFICARE
+     if (pageId === 'page-delete-product') {
+        resetDeleteFlow(false);
     }
+     // FINAL MODIFICARE
     if (pageId === 'page-picking') {
         startPickingProcess();
         setupPickingPageFooter(true); // Arată footer-ul de picking
@@ -57,7 +59,6 @@ function saveToLocalStorage(key, data) {
 
 // --- Funcții Utilitare UI ---
 
-// --- START MODIFICARE ---
 /**
  * Formatează o cheie de locație (ex: "1,2,3" sau "1,2,3,4") într-un format lizibil.
  * @param {string} locationKey - Cheia locației (ex: "1,2,3" sau "1,2,3,4")
@@ -99,7 +100,6 @@ function formatLocation(locationKey, large = false) {
     // Fallback dacă formatul e necunoscut
     return locationKey;
 }
-// --- FINAL MODIFICARE ---
 
 
 function showToast(message, isError = false) {
