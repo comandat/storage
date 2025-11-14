@@ -18,8 +18,11 @@ window.scannedLocation = null;
 window.currentScannedProduct = null; // NOU: {sku, product} - produsul scanat curent
 
 // START MODIFICARE: Stare "Mută Produs" înlocuită cu Stare "Șterge Produs"
+// START MODIFICARE: Stare "Mută Produs" înlocuită cu Stare "Șterge Produs"
 window.deleteProductList = []; // Listă de {sku, product}
 window.deleteLocation = null;
+window.currentScannedProductForDelete = null; // <-- ADaugă ACEASTĂ LINIE
+// FINAL MODIFICARE
 // FINAL MODIFICARE
 
 // Stare Dashboard
