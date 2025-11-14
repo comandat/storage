@@ -233,3 +233,4 @@ window.confirmDeleteQuantity = confirmDeleteQuantity; // MODIFICARE
 window.removeProductFromDeleteList = removeProductFromDeleteList;
 window.handleDeleteLocationScan = handleDeleteLocationScan;
 window.saveDeleteProduct = saveDeleteProduct;
+window.handleCancelDeleteFlow = handleCancelDeleteFlow;
