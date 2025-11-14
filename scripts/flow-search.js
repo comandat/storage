@@ -7,7 +7,7 @@ function toggleSearchFocus(isFocused) {
     const input = document.getElementById('search-input');
     
     const addProductCard = document.querySelector('a[href="#"][onclick="showPage(\'page-add-product\')"]');
-    const moveProductCard = document.querySelector('a[href="#"][onclick="showPage(\'page-move-product\')"]');
+    const moveProductCard = document.querySelector('a[href="#"][onclick="showPage(\'page-delete-product\')"]');
 
     if (isFocused) {
         // form.classList.add('focused'); // ELIMINAT
