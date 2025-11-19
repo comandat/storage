@@ -4,7 +4,7 @@ let scanBuffer = '';
 let lastKeyTime = 0;
 // Timpul maxim (ms) între taste pentru a fi considerat scanner. 
 // Scanerele trimit caracterele foarte rapid (10-30ms). Tastarea manuală e > 100ms.
-const SCANNER_TIMEOUT = 90; 
+const SCANNER_TIMEOUT = 200; 
 
 document.addEventListener('keydown', async (e) => {
     const currentTime = Date.now();
