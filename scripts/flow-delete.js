@@ -225,6 +225,35 @@ function handleCancelDeleteFlow() {
     }
 }
 
+async function quickDeleteProductBySku(sku) {
+    // 1. Verifică dacă suntem în pasul de confirmare (Step 3) - dacă da, ignoră
+    if (!document.getElementById('delete-step-3-confirm').classList.contains('hidden')) {
+        return;
+    }
+
+    const product = await getProductDetails(sku);
+    
+    const existingItem = deleteProductList.find(item => item.sku === sku);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        deleteProductList.push({
+            sku: sku,
+            product: product,
+            quantity: 1
+        });
+    }
+    
+    renderDeleteProductList();
+    showToast(`Selectat pt ștergere: ${product.name_ro || sku}`);
+
+    // Revenim la lista principală dacă eram în alt pas intermediar
+    if (document.getElementById('delete-step-1-products').classList.contains('hidden')) {
+        goToDeleteStep(1);
+    }
+}
+
 // Expun funcțiile necesare global
 window.resetDeleteFlow = resetDeleteFlow;
 window.goToDeleteStep = goToDeleteStep;
@@ -234,3 +263,4 @@ window.removeProductFromDeleteList = removeProductFromDeleteList;
 window.handleDeleteLocationScan = handleDeleteLocationScan;
 window.saveDeleteProduct = saveDeleteProduct;
 window.handleCancelDeleteFlow = handleCancelDeleteFlow;
+window.quickDeleteProductBySku = quickDeleteProductBySku;
