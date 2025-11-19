@@ -196,6 +196,38 @@ function handleCancelAddFlow() {
     }
 }
 
+async function quickAddProductBySku(sku) {
+    // 1. Verifică dacă suntem în pasul de confirmare (Step 3) - dacă da, ignoră
+    if (!document.getElementById('add-step-3-confirm').classList.contains('hidden')) {
+        return; 
+    }
+
+    // 2. Obține detaliile produsului
+    const product = await getProductDetails(sku);
+    
+    // 3. Verifică dacă există deja în listă
+    const existingItem = scannedProductList.find(item => item.sku === sku);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        scannedProductList.push({
+            sku: sku,
+            product: product,
+            quantity: 1
+        });
+    }
+
+    // 4. Actualizează UI-ul listei
+    renderAddProductList();
+    showToast(`Adăugat rapid: ${product.name_ro || sku}`);
+    
+    // 5. Asigură-te că rămânem/revenim la pasul 1 (în caz că eram la pasul de cantitate)
+    if (document.getElementById('add-step-1-products').classList.contains('hidden')) {
+         goToAddStep(1);
+    }
+}
+
 // ExpuN funcțiile necesare global
 window.goToAddStep = goToAddStep;
 window.handleProductScan = handleProductScan;
@@ -205,3 +237,4 @@ window.handleLocationScan = handleLocationScan;
 window.saveMultiAdd = saveMultiAdd;
 window.resetAddFlow = resetAddFlow;
 window.handleCancelAddFlow = handleCancelAddFlow;
+window.quickAddProductBySku = quickAddProductBySku;
