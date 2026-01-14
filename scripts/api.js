@@ -170,6 +170,33 @@ async function sendPrintTokenUpdate(curlString) {
     }
 }
 
+async function sendPrintAwbRequest(orderId) {
+    if (!orderId) {
+        showToast("Lipsă ID Comandă", true);
+        return;
+    }
+
+    showLoading(true);
+    try {
+        const response = await fetch(window.PRINT_AWB_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: orderId })
+        });
+
+        if (response.ok) {
+            showToast(`Printare inițiată (Comanda ${orderId})`);
+        } else {
+            throw new Error(`Eroare server: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Eroare printare AWB:", error);
+        showToast("Eroare la trimiterea comenzii de printare.", true);
+    } finally {
+        showLoading(false);
+    }
+}
+
 // ExpuN funcțiile necesare global
 window.loadInitialStorage = loadInitialStorage;
 window.fetchAndSetupOrders = fetchAndSetupOrders;
@@ -177,3 +204,4 @@ window.sendStorageUpdate = sendStorageUpdate;
 window.fetchProductDetailsBatch = fetchProductDetailsBatch;
 window.getProductDetails = getProductDetails;
 window.sendPrintTokenUpdate = sendPrintTokenUpdate;
+window.sendPrintAwbRequest = sendPrintAwbRequest;
