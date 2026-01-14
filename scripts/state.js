@@ -2,6 +2,7 @@
 window.STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/storage-update";
 window.GET_STORAGE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/get-storage";
 window.GET_ORDERS_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/8ba5359d-8ecd-4576-b44c-934ac4b661e2";
+window.REFRESH_TOKEN_WEBHOOK = "https://automatizare.comandat.ro/webhook/refresh-easysales-print-access";
 
 // --- Starea Aplicației ---
 window.qrScanner = null;
