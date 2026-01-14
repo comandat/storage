@@ -170,9 +170,10 @@ async function sendPrintTokenUpdate(curlString) {
     }
 }
 
-async function sendPrintAwbRequest(orderId) {
-    if (!orderId) {
-        showToast("Lipsă ID Comandă", true);
+async function sendPrintAwbRequest(payload) {
+    // Payload trebuie să fie un obiect: { orderId: 123, internalId: "..." }
+    if (!payload) {
+        showToast("Date lipsă pentru printare.", true);
         return;
     }
 
@@ -181,11 +182,13 @@ async function sendPrintAwbRequest(orderId) {
         const response = await fetch(window.PRINT_AWB_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: orderId })
+            body: JSON.stringify(payload) // Trimite tot obiectul exact cum vine
         });
 
         if (response.ok) {
-            showToast(`Printare inițiată (Comanda ${orderId})`);
+            // Afișăm internal_id în mesajul de succes pentru confirmare vizuală
+            const displayId = payload.internalId || payload.orderId;
+            showToast(`Printare trimisă: ${displayId}`);
         } else {
             throw new Error(`Eroare server: ${response.status}`);
         }
