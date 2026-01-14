@@ -246,7 +246,7 @@ function finishPicking() {
 
 async function triggerAwbPrint() {
     // 1. Identificăm produsul curent de pe ecran
-    if (currentRouteIndex >= pickingRoutes.length) return;
+    if (typeof currentRouteIndex === 'undefined' || currentRouteIndex >= pickingRoutes.length) return;
     
     const route = pickingRoutes[currentRouteIndex];
     if (!route || route.stops.length === 0) return;
@@ -254,32 +254,35 @@ async function triggerAwbPrint() {
     const stop = route.stops[currentStopIndex];
     const currentSku = stop.sku;
 
-    // 2. Căutăm acest SKU în lista de comenzi active (liveOrders)
-    // liveOrders conține obiecte de tipul: { order_id: 12345, products: [...] }
-    
+    // 2. Căutăm acest SKU în lista de comenzi active (liveOrders) pentru a găsi comanda părinte
     let foundOrder = null;
 
-    // Iterăm prin comenzi pentru a găsi una care conține acest produs
+    // liveOrders este populat în api.js și conține acum și câmpul 'internal_id'
     for (const order of liveOrders) {
         if (order.products && Array.isArray(order.products)) {
             const hasProduct = order.products.some(p => p.sku === currentSku);
             if (hasProduct) {
                 foundOrder = order;
-                break; // Am găsit prima comandă care conține produsul, ne oprim.
+                break; // Am găsit prima comandă care conține produsul
             }
         }
     }
 
-    // 3. Dacă am găsit comanda, trimitem cererea de printare
+    // 3. Dacă am găsit comanda, construim datele și trimitem
     if (foundOrder) {
-        // Folosim order_id (din n8n transform) sau id (dacă e structura raw)
         const orderIdToSend = foundOrder.order_id || foundOrder.id;
+        // Preluăm internal_id din obiectul comenzii (adus prin noul nod n8n)
+        const internalIdToSend = foundOrder.internal_id || "N/A"; 
         
-        if (confirm(`Printezi AWB pentru comanda #${orderIdToSend}?`)) {
-            await window.sendPrintAwbRequest(orderIdToSend);
+        // Afișăm internal_id în confirmare ca să fii sigur că e comanda corectă (ex: eMAG_...)
+        if (confirm(`Printezi AWB pentru comanda ${internalIdToSend}?`)) {
+            await window.sendPrintAwbRequest({
+                orderId: orderIdToSend,
+                internalId: internalIdToSend
+            });
         }
     } else {
-        showToast("Nu s-a găsit nicio comandă activă pentru acest produs.", true);
+        showToast("Nu s-a găsit comanda pentru acest produs.", true);
     }
 }
 
