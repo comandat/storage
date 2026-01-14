@@ -176,3 +176,4 @@ window.fetchAndSetupOrders = fetchAndSetupOrders;
 window.sendStorageUpdate = sendStorageUpdate;
 window.fetchProductDetailsBatch = fetchProductDetailsBatch;
 window.getProductDetails = getProductDetails;
+window.sendPrintTokenUpdate = sendPrintTokenUpdate;
