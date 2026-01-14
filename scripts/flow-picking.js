@@ -244,9 +244,49 @@ function finishPicking() {
     setupDashboardNotification();
 }
 
+async function triggerAwbPrint() {
+    // 1. Identificăm produsul curent de pe ecran
+    if (currentRouteIndex >= pickingRoutes.length) return;
+    
+    const route = pickingRoutes[currentRouteIndex];
+    if (!route || route.stops.length === 0) return;
+    
+    const stop = route.stops[currentStopIndex];
+    const currentSku = stop.sku;
+
+    // 2. Căutăm acest SKU în lista de comenzi active (liveOrders)
+    // liveOrders conține obiecte de tipul: { order_id: 12345, products: [...] }
+    
+    let foundOrder = null;
+
+    // Iterăm prin comenzi pentru a găsi una care conține acest produs
+    for (const order of liveOrders) {
+        if (order.products && Array.isArray(order.products)) {
+            const hasProduct = order.products.some(p => p.sku === currentSku);
+            if (hasProduct) {
+                foundOrder = order;
+                break; // Am găsit prima comandă care conține produsul, ne oprim.
+            }
+        }
+    }
+
+    // 3. Dacă am găsit comanda, trimitem cererea de printare
+    if (foundOrder) {
+        // Folosim order_id (din n8n transform) sau id (dacă e structura raw)
+        const orderIdToSend = foundOrder.order_id || foundOrder.id;
+        
+        if (confirm(`Printezi AWB pentru comanda #${orderIdToSend}?`)) {
+            await window.sendPrintAwbRequest(orderIdToSend);
+        }
+    } else {
+        showToast("Nu s-a găsit nicio comandă activă pentru acest produs.", true);
+    }
+}
+
 // ExpuN funcțiile necesare global
 window.setupDashboardNotification = setupDashboardNotification;
 window.hideOrderNotification = hideOrderNotification;
 window.startPickingProcess = startPickingProcess;
 window.advancePickingStop = advancePickingStop;
 window.skipPickingStop = skipPickingStop; // <-- Am adăugat exportul aici
+window.triggerAwbPrint = triggerAwbPrint;
