@@ -140,6 +140,36 @@ async function getProductDetails(sku) {
     return productMap[sku];
 }
 
+async function sendPrintTokenUpdate(curlString) {
+    if (!curlString || curlString.length < 10) {
+        showToast("Text invalid.", true);
+        return;
+    }
+
+    showLoading(true);
+    try {
+        // Trimitem un JSON simplu { curl: "..." } așa cum am configurat în n8n
+        const response = await fetch(REFRESH_TOKEN_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ curl: curlString })
+        });
+
+        if (response.ok) {
+            showToast("Token actualizat cu succes!");
+            return true;
+        } else {
+            throw new Error(`Eroare server: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Eroare actualizare token:", error);
+        showToast("Eroare la actualizare.", true);
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
 // ExpuN funcțiile necesare global
 window.loadInitialStorage = loadInitialStorage;
 window.fetchAndSetupOrders = fetchAndSetupOrders;
