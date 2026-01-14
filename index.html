@@ -52,6 +52,10 @@
         <div id="page-dashboard" class="page active p-6">
             <header class="flex items-center justify-center py-4 relative">
                 <h1 class="text-xl font-semibold text-text-light dark:text-text-dark">Depozit</h1>
+                
+                <button onclick="openSettingsModal()" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-subtext-light dark:text-subtext-dark opacity-30 hover:opacity-100 transition-opacity duration-300">
+                    <span class="material-icons-outlined text-xl">settings</span>
+                </button>
             </header>
 
             <div id="search-zone" class="mb-6 mt-6">
@@ -95,22 +99,22 @@
                         </div>
                     </div>
                 </a>
-                </main>
+            </main>
         </div>
 
         <div id="page-find-product" class="page"></div>
 
         <div id="page-add-product" class="page p-6 relative">
-<button onclick="handleCancelAddFlow()" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
-    <span class="material-icons-outlined text-3xl">close</span>
-</button>
+            <button onclick="handleCancelAddFlow()" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
+                <span class="material-icons-outlined text-3xl">close</span>
+            </button>
             
             <div id="add-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
                 <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează un produs pentru a-i adăuga cantitatea.</p>
                 
                 <div id="add-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
-                    </div>
+                </div>
 
                 <button onclick="startScanner('product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
                     <span class="material-icons-outlined">qr_code_scanner</span>
@@ -152,7 +156,7 @@
                 <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Acum scanează codul QR al locației (ex: "1,2,3").</p>
                 <button onclick="startScanner('location')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary">
                     <span class="material-icons-outlined">pin_drop</span>
-                    <span>Scanează Locație</span>
+                    <span>Scanează Locația</span>
                 </button>
                 <button onclick="goToAddStep(1)" class="w-full text-center text-primary mt-6">
                     Modifică Produsele
@@ -221,7 +225,7 @@
                     </div>
                 </div>
 
-                </div>
+            </div>
 
             <div id="picking-complete" class="hidden text-center p-8">
                 <span class="material-icons-outlined text-8xl text-green-500">task_alt</span>
@@ -245,16 +249,16 @@
         </div>
 
         <div id="page-delete-product" class="page p-6 relative">
-<button onclick="handleCancelDeleteFlow()" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
-    <span class="material-icons-outlined text-3xl">close</span>
-</button>
+            <button onclick="handleCancelDeleteFlow()" class="absolute top-6 right-6 p-2 text-subtext-light dark:text-subtext-dark z-10">
+                <span class="material-icons-outlined text-3xl">close</span>
+            </button>
             
             <div id="delete-step-1-products" class="animate-slide-in mt-8">
                 <h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-4 text-center">Pasul 1: Scanează Produsele</h2>
                 <p class="text-subtext-light dark:text-subtext-dark mb-6 text-center">Scanează un produs pentru a-i seta cantitatea de șters.</p>
                 
                 <div id="delete-product-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
-                    </div>
+                </div>
 
                 <button onclick="startScanner('delete_product')" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 text-lg shadow-lg shadow-primary/30 dark:shadow-glow-primary mb-4">
                     <span class="material-icons-outlined">qr_code_scanner</span>
@@ -366,7 +370,29 @@
         <div class="spinner"></div>
     </div>
 
-<script type="module" src="scripts/state.js"></script>
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-card-light dark:bg-card-dark w-full max-w-lg rounded-2xl p-6 shadow-2xl animate-slide-in border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-text-light dark:text-text-dark mb-2">Admin: Actualizare Token</h3>
+            <p class="text-sm text-subtext-light dark:text-subtext-dark mb-4">
+                Lipește aici comanda cURL completă (Copy as cURL bash/cmd) pentru a reîmprospăta sesiunea de printare.
+            </p>
+            
+            <textarea id="settings-curl-input" rows="6" 
+                class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-text-light dark:text-text-dark text-xs font-mono mb-6 focus:ring-2 focus:ring-primary outline-none resize-none" 
+                placeholder='curl "https://easy-sales.com/..." ...'></textarea>
+            
+            <div class="flex space-x-3">
+                <button onclick="closeSettingsModal()" class="flex-1 py-3 text-subtext-light dark:text-subtext-dark font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                    Anulează
+                </button>
+                <button onclick="handleTokenSubmit()" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30">
+                    Salvează & Update
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="scripts/state.js"></script>
     <script type="module" src="scripts/utils.js"></script>
     <script type="module" src="scripts/api.js"></script>
     <script type="module" src="scripts/scanner.js"></script> 
