@@ -254,32 +254,45 @@ async function triggerAwbPrint() {
     const stop = route.stops[currentStopIndex];
     const currentSku = stop.sku;
 
-    // 2. Căutăm acest SKU în lista de comenzi active (liveOrders) pentru a găsi comanda părinte
+    // 2. Căutăm acest SKU în lista de comenzi active (liveOrders)
     let foundOrder = null;
 
-    // liveOrders este populat în api.js și conține acum și câmpul 'internal_id'
     for (const order of liveOrders) {
         if (order.products && Array.isArray(order.products)) {
             const hasProduct = order.products.some(p => p.sku === currentSku);
             if (hasProduct) {
                 foundOrder = order;
-                break; // Am găsit prima comandă care conține produsul
+                break; 
             }
         }
     }
 
-    // 3. Dacă am găsit comanda, construim datele și trimitem
+    // 3. Logica de decizie: Generare sau Printare
     if (foundOrder) {
-        const orderIdToSend = foundOrder.order_id || foundOrder.id;
-        // Preluăm internal_id din obiectul comenzii (adus prin noul nod n8n)
-        const internalIdToSend = foundOrder.internal_id || "N/A"; 
+        const internalIdToSend = foundOrder.internal_id || "N/A";
         
-        // Afișăm internal_id în confirmare ca să fii sigur că e comanda corectă (ex: eMAG_...)
-        if (confirm(`Printezi AWB pentru comanda ${internalIdToSend}?`)) {
-            await window.sendPrintAwbRequest({
-                orderId: orderIdToSend,
-                internalId: internalIdToSend
-            });
+        // Verificăm dacă are deja AWB (URL valid mai lung de 5 caractere)
+        const hasAwb = foundOrder.awb_url && foundOrder.awb_url.length > 5;
+
+        if (hasAwb) {
+            // --- CAZ 1: Are AWB -> Printăm direct (Flow vechi) ---
+            if (confirm(`Printezi AWB existent pentru comanda ${internalIdToSend}?`)) {
+                await window.sendPrintAwbRequest({
+                    orderId: foundOrder.order_id || foundOrder.id, 
+                    internalId: internalIdToSend
+                });
+            }
+        } else {
+            // --- CAZ 2: Nu are AWB -> Generăm (Flow nou) ---
+            const marketplace = foundOrder.marketplace || "Unknown";
+            
+            // Mesaj diferit pentru utilizator
+            if (confirm(`NU există AWB. Generez AWB pentru ${marketplace} (ID: ${internalIdToSend}) și apoi printez?`)) {
+                await window.sendGenerateAwbRequest({
+                    internalId: internalIdToSend,
+                    marketplace: marketplace
+                });
+            }
         }
     } else {
         showToast("Nu s-a găsit comanda pentru acest produs.", true);
