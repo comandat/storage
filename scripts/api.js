@@ -200,6 +200,36 @@ async function sendPrintAwbRequest(payload) {
     }
 }
 
+async function sendGenerateAwbRequest(payload) {
+    // Payload așteptat: { internalId: "...", marketplace: "..." }
+    if (!payload || !payload.internalId) {
+        showToast("Date lipsă pentru generare AWB.", true);
+        return;
+    }
+
+    showLoading(true);
+    try {
+        const response = await fetch(window.GENERATE_AWB_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            showToast(`Se generează AWB pentru ${payload.internalId}...`);
+            // Dacă generarea reușește, webhook-ul din n8n va declanșa automat și printarea
+        } else {
+            throw new Error(`Eroare server: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Eroare generare AWB:", error);
+        showToast("Eroare la generarea AWB.", true);
+    } finally {
+        showLoading(false);
+    }
+}
+
+
 // ExpuN funcțiile necesare global
 window.loadInitialStorage = loadInitialStorage;
 window.fetchAndSetupOrders = fetchAndSetupOrders;
@@ -208,3 +238,4 @@ window.fetchProductDetailsBatch = fetchProductDetailsBatch;
 window.getProductDetails = getProductDetails;
 window.sendPrintTokenUpdate = sendPrintTokenUpdate;
 window.sendPrintAwbRequest = sendPrintAwbRequest;
+window.sendGenerateAwbRequest = sendGenerateAwbRequest;
