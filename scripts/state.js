@@ -8,33 +8,35 @@ window.GENERATE_AWB_WEBHOOK = "https://automatizare.comandat.ro/webhook/generate
 
 // --- Starea Aplicației ---
 window.qrScanner = null;
-// MODIFICAT: Scan modes
-window.currentScanMode = null; // 'product', 'location', 'find', 'delete_product', 'delete_location'
+// MODIFICAT: Added 'picking' mode
+window.currentScanMode = null; // 'product', 'location', 'find', 'delete_product', 'delete_location', 'picking'
 
 // NOU: Stare pentru camere
 window.availableCameras = [];
 window.currentCameraIndex = 0;
 
 // Stare "Adaugă Produs"
-window.scannedProductList = []; // Listă de {sku, product, quantity}
+window.scannedProductList = [];
 window.scannedLocation = null;
-window.currentScannedProduct = null; // NOU: {sku, product} - produsul scanat curent
+window.currentScannedProduct = null; 
 
-// START MODIFICARE: Stare "Mută Produs" înlocuită cu Stare "Șterge Produs"
-// START MODIFICARE: Stare "Mută Produs" înlocuită cu Stare "Șterge Produs"
-window.deleteProductList = []; // Listă de {sku, product}
+// Stare "Șterge Produs"
+window.deleteProductList = [];
 window.deleteLocation = null;
-window.currentScannedProductForDelete = null; // <-- ADaugă ACEASTĂ LINIE
-// FINAL MODIFICARE
-// FINAL MODIFICARE
+window.currentScannedProductForDelete = null;
 
 // Stare Dashboard
 window.isOrderNotificationHidden = false;
 
 // Stare Comenzi
-window.liveOrders = []; // <-- NOU (înlocuiește mockOrders)
+window.liveOrders = []; 
 
 // Stare Picking
 window.pickingRoutes = [];
 window.currentRouteIndex = 0;
 window.currentStopIndex = 0;
+
+// NOU: Stare pentru urmărirea progresului pe comenzi
+// Folosit pentru a determina când o comandă este completă
+window.globalPickedItems = new Map(); // Key: SKU, Value: Total Qty Picked in this session
+window.processedOrderIds = new Set(); // IDs of orders already sent to print
