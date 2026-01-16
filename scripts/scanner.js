@@ -181,6 +181,8 @@ function onScanSuccess(decodedText, decodedResult) {
         handleDeleteProductScan(decodedText);
     } else if (currentScanMode === 'delete_location') {
         handleDeleteLocationScan(decodedText);
+    } else if (currentScanMode === 'picking') { // NOU
+        handlePickingScan(decodedText);
     }
     // FINAL MODIFICARE
 }
