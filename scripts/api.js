@@ -229,6 +229,42 @@ async function sendGenerateAwbRequest(payload) {
     }
 }
 
+async function sendInvoiceRequest(payload) {
+    if (!payload || !payload.internal_order_id) {
+        showToast("Date lipsă pentru facturare.", true);
+        return false;
+    }
+
+    showLoading(true);
+    try {
+        const response = await fetch(window.INVOICE_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Verificăm dacă EasySales a răspuns cu success: true
+        if (data.success === true) {
+            showToast("Factură generată cu succes!");
+            return true;
+        } else {
+            console.error("Eroare EasySales Invoice:", data);
+            throw new Error(data.msg || data.message || "Eroare necunoscută la facturare.");
+        }
+
+    } catch (error) {
+        console.error("Eroare facturare:", error);
+        showToast(`Eroare facturare: ${error.message}`, true);
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
 
 // ExpuN funcțiile necesare global
 window.loadInitialStorage = loadInitialStorage;
@@ -239,3 +275,5 @@ window.getProductDetails = getProductDetails;
 window.sendPrintTokenUpdate = sendPrintTokenUpdate;
 window.sendPrintAwbRequest = sendPrintAwbRequest;
 window.sendGenerateAwbRequest = sendGenerateAwbRequest;
+window.sendInvoiceRequest = sendInvoiceRequest;
+window.INVOICE_WEBHOOK_URL = "https://automatizare.comandat.ro/webhook/invoice-easysales";
