@@ -39,9 +39,14 @@ function showPage(pageId) {
 
 function setupPickingPageFooter(show) {
     const footer = document.getElementById('picking-footer');
+    if (!footer) {
+        return; // Elementul nu există pe pagina curentă, nu facem nimic.
+    }
+
     if (show) {
         // Verifică dacă picking-ul e completat
-        const complete = document.getElementById('picking-complete').style.display !== 'none';
+        const pickingCompleteEl = document.getElementById('picking-complete');
+        const complete = pickingCompleteEl && pickingCompleteEl.style.display !== 'none';
         footer.style.display = complete ? 'none' : 'block';
     } else {
         footer.style.display = 'none';
