@@ -333,12 +333,23 @@ function showSuccessTimer() {
 
 function skipPickingStop() {
     if (currentRouteIndex >= pickingRoutes.length) return;
-    const currentOrder = pickingRoutes[currentRouteIndex];
     
-    const stop = currentOrder.stops.splice(currentStopIndex, 1)[0];
-    currentOrder.stops.push(stop);
+    // Dacă e singura comandă, nu are sens să o mutăm
+    if (pickingRoutes.length <= 1) {
+        showToast("Este singura comandă rămasă.", true);
+        return;
+    }
     
-    showToast("Produs amânat.");
+    // 1. Scoatem comanda curentă
+    const skippedOrder = pickingRoutes.splice(currentRouteIndex, 1)[0];
+    
+    // 2. O mutăm la final
+    pickingRoutes.push(skippedOrder);
+    
+    // 3. Resetăm produsul la 0 pentru noua comandă care a intrat pe poziție
+    currentStopIndex = 0;
+    
+    showToast("Comandă amânată.");
     renderCurrentPickingStop();
 }
 
