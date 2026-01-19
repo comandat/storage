@@ -73,9 +73,11 @@ async function startPickingProcess() {
 
 async function createOrderBasedPickingList(orders) {
     const orderList = [];
-    const inventory = loadFromLocalStorage('inventoryLocations');
+    // Încărcăm o copie a stocului pentru a face "rezervări" virtuale în timp ce calculăm rutele
+    // Astfel, dacă Comanda 1 ia tot stocul din Locația A, Comanda 2 nu va fi trimisă tot acolo.
+    const inventory = loadFromLocalStorage('inventoryLocations') || {};
     
-    // Colectăm toate SKU-urile
+    // Colectăm SKU-uri pentru detalii
     const allSkus = new Set();
     orders.forEach(o => {
         if(Array.isArray(o.products)) o.products.forEach(p => allSkus.add(p.sku));
@@ -83,35 +85,69 @@ async function createOrderBasedPickingList(orders) {
     const productMap = await fetchProductDetailsBatch(Array.from(allSkus));
 
     for (const order of orders) {
-        const consolidatedMap = new Map();
         if (!Array.isArray(order.products)) continue;
-
+        
+        let orderStops = [];
+        
+        // 1. Consolidăm cererea per SKU în cadrul comenzii
+        const demandMap = new Map();
         for (const item of order.products) {
-            if (consolidatedMap.has(item.sku)) {
-                consolidatedMap.get(item.sku).quantityToPick += item.quantity;
-            } else {
-                consolidatedMap.set(item.sku, {
-                    sku: item.sku,
-                    quantityToPick: item.quantity,
-                    locationKey: inventory[item.sku] ? Object.keys(inventory[item.sku])[0] || "N/A" : "N/A",
-                    product: productMap[item.sku]
+            const current = demandMap.get(item.sku) || 0;
+            demandMap.set(item.sku, current + item.quantity);
+        }
+
+        // 2. Alocăm stoc pentru fiecare SKU
+        for (const [sku, qtyNeeded] of demandMap.entries()) {
+            let qtyRemaining = qtyNeeded;
+            const productInfo = productMap[sku];
+            
+            const skuLocations = inventory[sku] || {};
+            // Sortăm locațiile pentru a fi ordonați (ex: 1,2,3... apoi A,B,C)
+            const sortedLocKeys = Object.keys(skuLocations).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+            // Iterăm locațiile și luăm cât putem
+            for (const locKey of sortedLocKeys) {
+                if (qtyRemaining <= 0) break;
+                
+                const available = skuLocations[locKey];
+                if (available <= 0) continue;
+
+                const toTake = Math.min(available, qtyRemaining);
+                
+                orderStops.push({
+                    sku: sku,
+                    quantityToPick: toTake,
+                    locationKey: locKey,
+                    product: productInfo
+                });
+
+                // Actualizăm starea locală/virtuală
+                qtyRemaining -= toTake;
+                skuLocations[locKey] -= toTake;
+            }
+
+            // Dacă nu am găsit suficient stoc
+            if (qtyRemaining > 0) {
+                orderStops.push({
+                    sku: sku,
+                    quantityToPick: qtyRemaining,
+                    locationKey: "LIPSĂ STOC", 
+                    product: productInfo
                 });
             }
         }
 
-        const stops = Array.from(consolidatedMap.values());
-        
-        // Sortare în cadrul comenzii (opțional, după locație)
-        stops.sort((a, b) => {
-            if (a.locationKey === "N/A") return 1;
-            if (b.locationKey === "N/A") return -1;
-            return a.locationKey.localeCompare(b.locationKey);
+        // 3. Sortăm pașii comenzii pentru un traseu optim (Locația 1 -> Locația 9)
+        orderStops.sort((a, b) => {
+            if (a.locationKey === "LIPSĂ STOC") return 1;
+            if (b.locationKey === "LIPSĂ STOC") return -1;
+            return a.locationKey.localeCompare(b.locationKey, undefined, { numeric: true });
         });
 
-        if (stops.length > 0) {
+        if (orderStops.length > 0) {
             orderList.push({
                 orderData: order,
-                stops: stops
+                stops: orderStops
             });
         }
     }
