@@ -42,6 +42,10 @@ body {
     display: block;
 }
 
+#page-picking.active {
+    display: flex;
+}
+
 /* Modal Scaner QR */
 #scanner-modal {
     position: fixed;
