@@ -37,6 +37,7 @@ async function startPickingProcess() {
     // Reset UI
     document.getElementById('picking-complete').classList.add('hidden');
     document.getElementById('picking-error-overlay').classList.add('hidden');
+    document.getElementById('picking-success-overlay').classList.add('hidden');
     document.getElementById('floating-order-bubble').classList.remove('visible');
     
     // Inițializează
@@ -47,8 +48,15 @@ async function startPickingProcess() {
         return;
     }
 
-    // 1. Grupează și pregătește lista: Array de COMENZI, fiecare având un Array de produse (stops)
-    // pickingRoutes va fi acum: [ {orderData: {...}, stops: [...]}, {orderData: {...}, stops: [...]} ]
+    // SORTARE: De la prima intrată (Cea mai veche) la ultima (Cea mai nouă)
+    // Presupunem că ID-urile sunt incrementale. Sortăm ASC după ID.
+    liveOrders.sort((a, b) => {
+        const idA = a.order_id || a.id || 0;
+        const idB = b.order_id || b.id || 0;
+        return idA - idB;
+    });
+
+    // 1. Grupează și pregătește lista de COMENZI
     pickingRoutes = await createOrderBasedPickingList(liveOrders);
     
     currentRouteIndex = 0; // Indexul comenzii curente
@@ -67,7 +75,7 @@ async function createOrderBasedPickingList(orders) {
     const orderList = [];
     const inventory = loadFromLocalStorage('inventoryLocations');
     
-    // Colectăm toate SKU-urile pentru a le lua detaliile o singură dată
+    // Colectăm toate SKU-urile
     const allSkus = new Set();
     orders.forEach(o => {
         if(Array.isArray(o.products)) o.products.forEach(p => allSkus.add(p.sku));
@@ -75,7 +83,6 @@ async function createOrderBasedPickingList(orders) {
     const productMap = await fetchProductDetailsBatch(Array.from(allSkus));
 
     for (const order of orders) {
-        // Consolidăm produsele din ACEASTĂ comandă (ex: 2 linii cu același SKU -> 1 linie cu cantitate cumulată)
         const consolidatedMap = new Map();
         if (!Array.isArray(order.products)) continue;
 
@@ -86,7 +93,6 @@ async function createOrderBasedPickingList(orders) {
                 consolidatedMap.set(item.sku, {
                     sku: item.sku,
                     quantityToPick: item.quantity,
-                    // Găsim o locație (strategie simplă: prima găsită)
                     locationKey: inventory[item.sku] ? Object.keys(inventory[item.sku])[0] || "N/A" : "N/A",
                     product: productMap[item.sku]
                 });
@@ -95,7 +101,7 @@ async function createOrderBasedPickingList(orders) {
 
         const stops = Array.from(consolidatedMap.values());
         
-        // Opțional: Sortăm produsele din comandă după locație pentru a optimiza drumul în depozit PENTRU ACEASTĂ COMANDĂ
+        // Sortare în cadrul comenzii (opțional, după locație)
         stops.sort((a, b) => {
             if (a.locationKey === "N/A") return 1;
             if (b.locationKey === "N/A") return -1;
@@ -104,7 +110,7 @@ async function createOrderBasedPickingList(orders) {
 
         if (stops.length > 0) {
             orderList.push({
-                orderData: order, // Păstrăm referința la obiectul comandă original
+                orderData: order,
                 stops: stops
             });
         }
@@ -123,7 +129,6 @@ async function renderCurrentPickingStop() {
     
     const currentOrder = pickingRoutes[currentRouteIndex];
     if (!currentOrder || currentOrder.stops.length === 0) {
-        // Skip empty order
         currentRouteIndex++;
         currentStopIndex = 0;
         renderCurrentPickingStop();
@@ -154,15 +159,26 @@ async function renderCurrentPickingStop() {
     const qty = stop.quantityToPick;
     document.getElementById('picking-qty-display').textContent = `${qty} unitat${qty !== 1 ? 'e' : 'i'}`;
 
-    // 4. Progres (Relativ la COMANDA CURENTĂ)
-    const totalStopsInOrder = currentOrder.stops.length;
-    const currentStopNumber = currentStopIndex + 1;
-    const percentage = Math.round((currentStopNumber / totalStopsInOrder) * 100);
-
-    document.getElementById('picking-progress-bar').style.width = `${percentage}%`;
-    // Afișăm explicit că e per comandă
-    document.getElementById('picking-progress-text').innerHTML = `Produs <span class="text-white">${currentStopNumber}</span> din ${totalStopsInOrder}`;
-    document.getElementById('picking-progress-percent').textContent = `${percentage}%`;
+    // 4. Progres (GLOBAL PE COMENZI)
+    const totalOrders = pickingRoutes.length;
+    const currentOrderNumber = currentRouteIndex + 1;
+    
+    // Calculăm procentul în funcție de câte comenzi am terminat + cât am făcut din comanda curentă
+    // (Opțional, pentru finețe) SAU pur și simplu "Comanda X din Y"
+    
+    // Text: "Comanda 1 din 5"
+    document.getElementById('picking-progress-text').innerHTML = `Comanda <span class="text-white">${currentOrderNumber}</span> din ${totalOrders}`;
+    
+    // Bara: Progresul global
+    // Fiecare comandă completă = 1 punct. Comanda curentă contribuie cu fracție.
+    const stepsInCurrentOrder = currentOrder.stops.length;
+    const currentStep = currentStopIndex; // începe de la 0
+    
+    const fraction = stepsInCurrentOrder > 0 ? (currentStep / stepsInCurrentOrder) : 0;
+    const globalProgress = ((currentRouteIndex + fraction) / totalOrders) * 100;
+    
+    document.getElementById('picking-progress-bar').style.width = `${Math.round(globalProgress)}%`;
+    document.getElementById('picking-progress-percent').textContent = `${Math.round(globalProgress)}%`;
 }
 
 // --- Logică Scanare ---
@@ -181,33 +197,18 @@ async function handlePickingScan(scannedCode) {
     const scanned = scannedCode.trim().toUpperCase();
 
     if (scanned === expectedSku) {
-        // stopScanner(); // Oprit automat de scanner.js
         showToast("Cod Corect!", false);
         await advancePickingStop(); 
     } else {
-        // EROARE VIZUALĂ MARE
         showWrongProductError();
     }
 }
 
 function showWrongProductError() {
-    // Oprire scanner temporar (dacă nu e oprit deja)
-    if(window.html5QrcodeScanner) {
-        // Nu-l oprim complet ca să nu reinițializăm camera greu, 
-        // dar vizual acoperim totul.
-        // Sau putem opri scanarea logică.
-    }
-
     const overlay = document.getElementById('picking-error-overlay');
     overlay.classList.remove('hidden');
-
-    // Ascunde după 2 secunde
     setTimeout(() => {
         overlay.classList.add('hidden');
-        // Dacă scannerul a fost oprit, îl repornim? 
-        // De regulă în scanner.js, onScanSuccess nu oprește camera decât dacă noi cerem.
-        // Aici NU am cerut stopScanner(), deci camera merge în spate.
-        // Utilizatorul poate scana din nou imediat ce dispare overlay-ul.
     }, 2000);
 }
 
@@ -228,28 +229,28 @@ async function advancePickingStop() {
          await sendStorageUpdate(stop.sku, stop.locationKey, "scadere", stop.quantityToPick);
     }
 
-    // 2. Incrementare
+    // 2. Incrementare pas
     currentStopIndex++;
 
-    // 3. Verifică dacă s-a terminat COMANDA CURENTĂ
+    // 3. Verifică dacă s-a terminat COMANDA
     if (currentStopIndex >= currentOrder.stops.length) {
-        // Comanda e gata! Încercăm facturarea și AWB-ul
+        
+        // --- FINALIZARE COMANDĂ ---
         const success = await handleOrderComplete(currentOrder.orderData);
         
         if (success) {
-            // Totul OK -> Trecem la următoarea comandă
+            // Dacă totul e OK, trecem la următoarea
             currentRouteIndex++;
             currentStopIndex = 0;
         } else {
-            // EROARE -> Rămânem aici
-            // Decrementăm indexul pentru a nu fi "out of bounds" la render, 
-            // și pentru a permite operatorului să vadă ultimul produs și să știe că s-a blocat aici.
-            // Ideal ar fi un buton "Retry", dar momentan blocăm avansarea.
+            // Dacă eroare, rămânem pe loc (vizual la ultimul produs)
+            // Operatorul trebuie să rezolve eroarea extern și să încerce din nou?
+            // Deoarece am incrementat deja stocul local, e tricky.
+            // Pentru simplitate, decrementăm indexul vizual.
             currentStopIndex--; 
         }
     }
     
-    // 4. Randează următorul pas (sau finish)
     renderCurrentPickingStop();
 }
 
@@ -259,7 +260,7 @@ async function handleOrderComplete(orderData) {
     const awbUrl = orderData.awb_url;
     const marketplace = orderData.marketplace || "Unknown";
 
-    showToast(`Comandă finalizată: ${internalId}. Se emite factura...`, false);
+    showToast(`Finalizare comandă ${internalId}...`, false);
 
     // 1. Emitere Factură
     const invoiceSuccess = await window.sendInvoiceRequest({
@@ -267,42 +268,77 @@ async function handleOrderComplete(orderData) {
     });
 
     if (!invoiceSuccess) {
-        showToast("STOP: Factura nu a putut fi generată.", true);
-        return false; // Oprește fluxul
+        showToast("STOP: Facturare eșuată.", true);
+        return false; 
     }
 
-    // 2. Logică AWB (Doar dacă factura e OK)
-    if (awbUrl && awbUrl.length > 5) {
-        showToast(`Se printează AWB...`);
-        await window.sendPrintAwbRequest({
-            orderId: orderId,
-            internalId: internalId
-        });
-    } else {
-        showToast(`Se generează și printează AWB...`);
-        await window.sendGenerateAwbRequest({
-            internalId: internalId,
-            marketplace: marketplace
-        });
+    // 2. Logică AWB
+    try {
+        if (awbUrl && awbUrl.length > 5) {
+            await window.sendPrintAwbRequest({
+                orderId: orderId,
+                internalId: internalId
+            });
+        } else {
+            await window.sendGenerateAwbRequest({
+                internalId: internalId,
+                marketplace: marketplace
+            });
+        }
+    } catch (e) {
+        showToast("Eroare la AWB.", true);
+        return false;
     }
+
+    // 3. AFIȘARE TIMER SUCCES (5 secunde)
+    // Dacă am ajuns aici, totul e OK (Factura + AWB trimis)
+    await showSuccessTimer();
 
     return true;
+}
+
+function showSuccessTimer() {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('picking-success-overlay');
+        const countSpan = document.getElementById('success-timer-count');
+        const ring = document.getElementById('success-timer-ring');
+        
+        overlay.classList.remove('hidden');
+        
+        let secondsLeft = 5;
+        countSpan.textContent = secondsLeft;
+        
+        // Reset ring animation
+        ring.style.strokeDashoffset = '0';
+        
+        // Force reflow
+        void ring.offsetWidth;
+        
+        // Start animation (754 is circumference)
+        ring.style.strokeDashoffset = '754';
+        ring.style.transitionDuration = '5s';
+
+        const timer = setInterval(() => {
+            secondsLeft--;
+            countSpan.textContent = secondsLeft;
+            
+            if (secondsLeft <= 0) {
+                clearInterval(timer);
+                overlay.classList.add('hidden');
+                resolve(); // Gata, putem trece mai departe
+            }
+        }, 1000);
+    });
 }
 
 function skipPickingStop() {
     if (currentRouteIndex >= pickingRoutes.length) return;
     const currentOrder = pickingRoutes[currentRouteIndex];
     
-    // Mutăm stop-ul curent la finalul listei acestei comenzi
     const stop = currentOrder.stops.splice(currentStopIndex, 1)[0];
     currentOrder.stops.push(stop);
     
-    // Deoarece l-am scos de la indexul curent și l-am pus la coadă,
-    // practic indexul curent acum pointează către "următorul" element vechi.
-    // Nu incrementăm currentStopIndex, dar trebuie să verificăm limitele.
-    
-    // Refresh UI
-    showToast("Produs amânat (la finalul comenzii).");
+    showToast("Produs amânat.");
     renderCurrentPickingStop();
 }
 
