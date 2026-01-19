@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -188,7 +189,10 @@
             <header class="pt-4 pb-2 bg-background-dark z-10 shrink-0">
                 <div class="px-6 mb-2 flex justify-between items-start">
                     <div class="flex flex-col">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Acțiune</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Acțiune</span>
+                            <span id="multi-product-indicator" class="hidden text-[10px] font-bold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase tracking-wider mb-1 border border-blue-500/30">Multi-Produs</span>
+                        </div>
                         <h1 class="text-2xl font-extrabold text-white tracking-tight">Colectare</h1>
                     </div>
                     <button onclick="showPage('page-dashboard')" class="p-2 text-gray-400 hover:text-white transition-colors">
@@ -263,10 +267,9 @@
                 </div>
             </footer>
             
-            <div id="picking-error-overlay" class="hidden absolute inset-0 bg-red-600 z-[60] flex flex-col items-center justify-center p-8 text-white animate-pulse">
-                <span class="material-symbols-outlined text-9xl mb-6 scale-150">cancel</span>
-                <h2 class="text-4xl font-extrabold uppercase tracking-widest text-center">Produs<br>Greșit</h2>
-                <p class="mt-8 text-xl font-medium opacity-90">Încearcă din nou</p>
+            <div id="picking-error-overlay" class="hidden absolute inset-0 bg-red-600/90 backdrop-blur-sm z-[60] flex flex-col items-center justify-center p-8 text-white">
+                <div id="lottie-error-container" class="w-80 h-80"></div>
+                <p class="mt-4 text-2xl font-bold uppercase tracking-widest opacity-90">Produs Greșit</p>
             </div>
 
             <div id="picking-success-overlay" class="hidden absolute inset-0 bg-background-dark z-[60] flex flex-col items-center justify-center p-6 text-white">
@@ -291,6 +294,16 @@
                             <span class="text-xl text-gray-500 uppercase tracking-widest mt-1">secunde</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="picking-item-success-overlay" class="hidden absolute inset-0 bg-green-600 z-[60] flex flex-col items-center justify-center p-8 text-white">
+                <span class="material-symbols-outlined text-9xl mb-6 scale-150">check_circle</span>
+                <h2 class="text-4xl font-extrabold uppercase tracking-widest text-center">Produs<br>Corect!</h2>
+                <p class="mt-8 text-xl font-medium opacity-90 text-center">Continuă comanda...</p>
+                <div class="mt-8 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
+                    <span class="material-symbols-outlined text-sm">inventory_2</span>
+                    <span class="text-sm font-bold uppercase tracking-wide">Comandă Multi-Produs</span>
                 </div>
             </div>
             
