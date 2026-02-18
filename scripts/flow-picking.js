@@ -442,12 +442,9 @@ function showItemSuccessOverlay() {
 async function handleOrderComplete(orderData) {
     const orderId = orderData.order_id || orderData.id;
     const internalId = orderData.internal_id || "N/A";
-    const awbUrl = orderData.awb_url;
-    const marketplace = orderData.marketplace || "Unknown";
 
     showToast(`Finalizare comandă ${internalId}...`, false);
 
-    // 1. Emitere Factură
     const invoiceSuccess = await window.sendInvoiceRequest({
         internal_order_id: internalId
     });
@@ -457,25 +454,10 @@ async function handleOrderComplete(orderData) {
         return false; 
     }
 
-    // 2. Logică AWB
-    try {
-        if (awbUrl && awbUrl.length > 5) {
-            await window.sendPrintAwbRequest({
-                orderId: orderId,
-                internalId: internalId
-            });
-        } else {
-            await window.sendGenerateAwbRequest({
-                internalId: internalId,
-                marketplace: marketplace
-            });
-        }
-    } catch (e) {
-        showToast("Eroare la AWB.", true);
-        return false;
-    }
+    console.log("AWB Generation/Printing skipped per configuration.");
 
-    // 3. AFIȘARE TIMER SUCCES (5 secunde)
+    showToast("Comandă procesată cu succes.", false);
+
     await showSuccessTimer();
 
     return true;
