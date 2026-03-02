@@ -2,43 +2,55 @@
 
 let scanBuffer = '';
 let lastKeyTime = 0;
-// Timpul maxim (ms) între taste pentru a fi considerat scanner. 
-// Scanerele trimit caracterele foarte rapid (10-30ms). Tastarea manuală e > 100ms.
-const SCANNER_TIMEOUT = 300; 
+let scanTimeout; // Variabilă nouă pentru a stoca timer-ul
+
+// Timpul maxim (ms) permis între taste pentru a considera că fac parte din aceeași secvență
+const TYPING_TIMEOUT = 300; 
+// Timpul de așteptare (ms) după ultima tastă pentru a declanșa procesarea automată
+const PROCESS_TIMEOUT = 50; 
 
 document.addEventListener('keydown', async (e) => {
-    const currentTime = Date.now();
-    const char = e.key;
+    // Ignorăm tasta Enter complet, dar îi dăm preventDefault ca să nu facă submit la vreun formular accidental
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
 
-    // 1. Logica de detecție a vitezei
-    // Dacă a trecut prea mult timp de la ultima tastă, resetăm bufferul 
-    // (presupunem că a început o nouă secvență sau e tastare manuală)
-    if (currentTime - lastKeyTime > SCANNER_TIMEOUT) {
-        // Excepție: Dacă bufferul e gol, e prima tastă, deci e ok.
-        // Dacă bufferul avea ceva, îl ștergem pentru că a fost o pauză prea lungă.
+    // Ne interesează doar caracterele simple (litere, cifre, simboluri de lungime 1)
+    if (e.key.length !== 1) return;
+
+    const currentTime = Date.now();
+
+    // 1. Dacă a trecut prea mult timp de la ultima tastă (>300ms), 
+    // înseamnă că probabil cineva tastează manual, deci resetăm bufferul.
+    if (currentTime - lastKeyTime > TYPING_TIMEOUT) {
         if (scanBuffer.length > 0) {
             scanBuffer = '';
         }
     }
+    
     lastKeyTime = currentTime;
 
-    // 2. Procesarea tastei 'Enter' (sfârșit de scanare)
-    if (char === 'Enter') {
-        // Dacă bufferul e suficient de lung, îl considerăm cod scanat
-        if (scanBuffer.length > 1) { 
-            e.preventDefault(); // Prevenim submiterea formularelor standard
-            e.stopPropagation();
-            
-            await processHardwareScan(scanBuffer);
-            scanBuffer = ''; // Resetăm după procesare
-        }
-        return;
-    }
+    // 2. Acumulăm caracterul
+    scanBuffer += e.key;
 
-    // 3. Acumularea caracterelor (doar caractere printabile, lungime 1)
-    if (char.length === 1) {
-        scanBuffer += char;
-    }
+    // 3. Resetăm timer-ul la fiecare caracter nou primit
+    clearTimeout(scanTimeout);
+
+    // 4. Setăm un nou timer. Dacă trec 50ms fără nicio tastă nouă, procesăm scanarea.
+    scanTimeout = setTimeout(async () => {
+        // Dacă bufferul are suficiente caractere, îl considerăm cod scanat
+        if (scanBuffer.length > 1) { 
+            if (e.preventDefault) e.preventDefault();
+            
+            // Salvăm codul și curățăm bufferul imediat pentru a fi gata de o nouă scanare
+            const codeToProcess = scanBuffer;
+            scanBuffer = ''; 
+            
+            await processHardwareScan(codeToProcess);
+        }
+    }, PROCESS_TIMEOUT);
 });
 
 async function processHardwareScan(code) {
@@ -117,7 +129,6 @@ async function processHardwareScan(code) {
                 window.toggleSearchFocus(true);
             }
             // Dacă suntem pe altă pagină decât dashboard/find, mergem acolo
-            // (Deși cerința spunea HOME/Cauta, e bine de știut)
             if (pageId !== 'page-dashboard') {
                 window.showPage('page-dashboard');
                 // Mic delay pentru a permite randarea
