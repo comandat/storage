@@ -74,21 +74,21 @@ function formatLocation(locationKey, large = false) {
     const parts = locationKey.split(',');
     
     if (large) {
-        // --- Format MARE ---
+        // --- Format MARE (Compactat pentru ecrane mici) ---
         if (parts.length === 3) {
             // Format vechi (Rand, Deschidere, Poliță)
             return `
-                <span class="block">Rand: <span class="text-4xl">${parts[0]}</span></span>
-                <span class="block">Deschidere: <span class="text-4xl">${parts[1]}</span></span>
-                <span class="block">Poliță: <span class="text-4xl">${parts[2]}</span></span>
+                <span class="block text-sm">Rand: <span class="text-2xl font-bold text-white">${parts[0]}</span></span>
+                <span class="block text-sm">Deschidere: <span class="text-2xl font-bold text-white">${parts[1]}</span></span>
+                <span class="block text-sm">Poliță: <span class="text-2xl font-bold text-white">${parts[2]}</span></span>
             `;
         } else if (parts.length === 4) {
             // Format nou (cu Cutie)
             return `
-                <span class="block">Rand: <span class="text-4xl">${parts[0]}</span></span>
-                <span class="block">Deschidere: <span class="text-4xl">${parts[1]}</span></span>
-                <span class="block">Poliță: <span class="text-4xl">${parts[2]}</span></span>
-                <span class="block text-primary">Cutie: <span class="text-4xl">${parts[3]}</span></span>
+                <span class="block text-sm">Rand: <span class="text-2xl font-bold text-white">${parts[0]}</span></span>
+                <span class="block text-sm">Deschidere: <span class="text-2xl font-bold text-white">${parts[1]}</span></span>
+                <span class="block text-sm">Poliță: <span class="text-2xl font-bold text-white">${parts[2]}</span></span>
+                <span class="block text-sm text-primary">Cutie: <span class="text-2xl font-bold">${parts[3]}</span></span>
             `;
         }
     } else {
